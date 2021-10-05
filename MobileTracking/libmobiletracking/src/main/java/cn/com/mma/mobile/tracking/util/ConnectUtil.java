@@ -5,16 +5,23 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.CookieHandler;
+import java.net.CookieManager;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.util.List;
+import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.util.Log;
+
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -136,6 +143,7 @@ public class ConnectUtil {
             int statusCode = httpConnection.getResponseCode();
 
 
+
             if (statusCode == HttpURLConnection.HTTP_OK || statusCode == HttpURLConnection.HTTP_MOVED_PERM || statusCode == HttpURLConnection.HTTP_MOVED_TEMP) {
 
                 try {
@@ -154,6 +162,10 @@ public class ConnectUtil {
                 }
             }
         } catch (Exception e) {
+
+            System.out.println("upload监测链接异常:" + e.toString());
+
+
         } finally {
             if (null != is)
                 try {
@@ -161,6 +173,7 @@ public class ConnectUtil {
                 } catch (final IOException e) {
                 }
             if (null != httpConnection)
+                
                 httpConnection.disconnect();
         }
 
@@ -291,6 +304,51 @@ public class ConnectUtil {
     }
 
 
+    /**
+     * 网络ID获取
+     * @param urlString
+     * @return
+     */
+    public static String requestID(String urlString){
+        String value ="空值";
+//        changeUI("正在网络请求ID");
+        String resultData = "";
+        try {
+
+            CookieManager cookieManager = new CookieManager();
+            CookieHandler.setDefault(cookieManager);
+
+            URL url = new URL(urlString);
+            HttpURLConnection urlConn=(HttpURLConnection)url.openConnection();
+            //设置超时时间
+            urlConn.setConnectTimeout(CONNECT_TIMEOUT);
+            urlConn.setRequestMethod("GET");
+
+            int code =urlConn.getResponseCode();
+
+            Log.d("lincoln","请求code"+code);
+            //获取所有Header
+            Map<String, List<String>> map = urlConn.getHeaderFields();
+            List<String> cookies = map.get("Set-Cookie");
+            for (int i=0; i < cookies.size();i++){
+                String a =cookies.get(i);
+                if(a!= null && a.contains("a=")){
+                    value = a.split(";")[0];
+                    value = value.split("=")[1];
+//                    request.completed(value);
+                }
+            }
+            //            storeCookies(urlConn);
+            //关闭http连接
+            urlConn.disconnect();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return value;
+    }
+
+
     private static TrustManager[] trustAllManager = {new X509TrustManager() {
         public X509Certificate[] getAcceptedIssuers() {
             return null;
@@ -314,6 +372,60 @@ public class ConnectUtil {
         public boolean verify(String hostname, SSLSession session) {
             return true;
         }
+    }
+
+    /**
+     * 网络ID获取
+     * @param urlString
+     * @return
+     */
+    public String requestID(Context context, String urlString, RequestSuccess request){
+        String value ="unknow";
+//        changeUI("正在网络请求ID");
+        String resultData = "";
+        try {
+
+            CookieManager cookieManager = new CookieManager();
+            CookieHandler.setDefault(cookieManager);
+
+            URL url = new URL(urlString);
+            HttpURLConnection urlConn=(HttpURLConnection)url.openConnection();
+            //设置超时时间
+            urlConn.setConnectTimeout(CONNECT_TIMEOUT);
+            urlConn.setRequestMethod("GET");
+
+            int code =urlConn.getResponseCode();
+
+//            Log.d("lincoln","请求code"+code);
+            //获取所有Header
+            Map<String, List<String>> map = urlConn.getHeaderFields();
+            List<String> cookies = map.get("Set-Cookie");
+            for (int i=0; i < cookies.size();i++){
+                String a =cookies.get(i);
+                if(a!= null && a.contains("a=")){
+                    value = a.split(";")[0];
+                    value = value.split("=")[1];
+
+                    request.completed(value);
+                }
+            }
+            //            storeCookies(urlConn);
+            //关闭http连接
+            urlConn.disconnect();
+        } catch (IOException e) {
+            e.printStackTrace();
+//            Log.d("qianqian","请求code"+e.toString());
+
+        }
+
+        return value;
+    }
+
+    /**
+     * 请求ADID成功后的回调接口
+     */
+    public interface RequestSuccess{
+        void completed(String result);
     }
 
 }

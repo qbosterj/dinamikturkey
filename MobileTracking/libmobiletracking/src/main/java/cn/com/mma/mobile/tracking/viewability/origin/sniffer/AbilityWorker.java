@@ -137,6 +137,30 @@ public class AbilityWorker implements AbilityCallback {
         }
     }
 
+
+
+    /**
+     * 产生强交互行为，停止监测立即上报
+     */
+    public void stopWorkerForStrongInteract(String explorerID) {
+        ViewAbilityExplorer existExplore = explorers.get(explorerID);
+        KLog.d("stopWorker->ID:" + explorerID + " existExplore:" + existExplore);
+        //当前Work池内存在 停止并上报，
+        if (existExplore != null) {
+            KLog.w("当前广告位:" + explorerID + " 存在,产生强交互行为，满足可视，停止监测并UPLOAD!");
+            //设置为强交互行为
+            existExplore.setStrongInteract(true);
+            try {
+                existExplore.breakToUpload();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            //强交互行为不移除中点监测任务
+//            existExplore.stop();
+//            explorers.remove(explorerID);
+        }
+    }
+
     @Override
     public void onSend(final String trackURL) {
         new Thread(new Runnable() {
@@ -208,6 +232,7 @@ public class AbilityWorker implements AbilityCallback {
                 long cost = end - start;
                 cacheIndex++;
 
+//                System.out.println("index:" + cacheIndex + " cost:" + cost + "ms, workExplorers length:" + len);
                 KLog.d("index:" + cacheIndex + " cost:" + cost + "ms, workExplorers length:" + len);
                 KLog.v("<-----------------------------Time Line end" + " [" + Thread.currentThread().getId() + "]" + "--------------------------------------------------->");
             } catch (Exception e) {

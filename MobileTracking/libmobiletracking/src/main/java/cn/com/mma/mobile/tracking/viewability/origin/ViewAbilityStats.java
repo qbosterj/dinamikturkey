@@ -51,6 +51,9 @@ public class ViewAbilityStats implements Serializable {
     public static final String ADVIEWABILITY = "Adviewability";
     /* 监测可视性 vx */
     public static final String ADVIEWABILITY_RESULT = "AdviewabilityResult";
+    /* CBR br */
+    public static final String ADVIEWABILITY_RENDER = "ImpressionType";
+
     /* 监测可测量性 2h */
     public static final String ADMEASURABILITY = "AdMeasurability";
     /* 监测轨迹数据是否上报 va */
@@ -69,6 +72,9 @@ public class ViewAbilityStats implements Serializable {
     public static final String ADVIEWABILITY_VIDEO_DURATION = "AdviewabilityVideoDuration";
     /* 视频进度监测配置 2x */
     public static final String ADVIEWABILITY_VIDEO_PROGRESSPOINT = "AdviewabilityVideoProgressPoint";
+
+    /* 强交互行为曝光 vk*/
+    public static final String ADVIEWABILITY_STRONG_INTERACT = "AdviewabilityStrongInteract";
 
     //对应配置项viewabilityarguments内的<argument>标签 end
 
@@ -316,6 +322,14 @@ public class ViewAbilityStats implements Serializable {
             sb.append("2");
         }
 
+        //可视化曝光接口如果传入的View为NULL，则需要在监测链接中串上br=0直接上报，不需要再发出不可测量的监测上报
+//        String render_view = viewabilityarguments.get(ADVIEWABILITY_RENDER);
+//        if (!TextUtils.isEmpty(render_view)) {
+//            sb.append(separator);
+//            sb.append(render_view);
+//            sb.append(equalizer);
+//            sb.append("0");
+//        }
         String measureability = viewabilityarguments.get(ADMEASURABILITY);
         if (!TextUtils.isEmpty(measureability)) {
             sb.append(separator);

@@ -40,6 +40,10 @@ public class Constant {
 	public static final String TRACKING_TERM = "TERM";
 	public static final String TRACKING_WIFISSID = "WIFISSID";
 	public static final String TRACKING_WIFIBSSID = "WIFIBSSID";
+	//新增华为设备ID标识，OAID
+	public static final String TRACKING_OAID = "OAID";
+
+	public static final String TRACKING_ADID = "ADID";
 	public static final String TRACKING_IMEI = "IMEI";
 	public static final String TRACKING_RAWIMEI = "RAWIMEI";
 	public static final String TRACKING_ODIN = "ODIN";
@@ -47,9 +51,11 @@ public class Constant {
 	public static final String TRACKING_MUDS = "MUDS";
 	public static final String TRACKING_URL = "URL";
 	public static final String REDIRECTURL = "REDIRECTURL";
+	/** frame参数中的分隔符 */
+	public static final String DIVIDE_MULT = "X";
 
 	public static final String TRACKING_SDKVS = "SDKVS";
-	public static final String TRACKING_SDKVS_VALUE = "V2.0.3";
+	public static final String TRACKING_SDKVS_VALUE = "V2.1.0";
 
 	/**
 	 * 新版常量 Begin

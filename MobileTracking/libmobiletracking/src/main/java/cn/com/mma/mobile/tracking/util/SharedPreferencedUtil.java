@@ -17,6 +17,9 @@ public class SharedPreferencedUtil {
 	public static final String SP_NAME_CONFIG = "cn.com.mma.mobile.tracking.sdkconfig";
 	public static final String SP_NAME_NORMAL = "cn.com.mma.mobile.tracking.normal";
 	public static final String SP_NAME_FAILED = "cn.com.mma.mobile.tracking.falied";
+
+	public static final String SP_NAME= "ID_SP";
+	public static final String SP_KEY_ID = "ID_KEY";
 	/**
 	 * SP_NAME_CONFIG 保存文件的key
 	 */
@@ -135,5 +138,17 @@ public class SharedPreferencedUtil {
 		SharedPreferences sharedPreferences = context.getSharedPreferences(
 				spName, Context.MODE_PRIVATE);
 		sharedPreferences.edit().clear().commit();
+	}
+
+	public static void putString(Context context, String value) {
+		SharedPreferences sPreferences = context.getSharedPreferences(SP_NAME, Context.MODE_PRIVATE);
+		Editor editor = sPreferences.edit();
+		editor.putString(SP_KEY_ID, value);
+		editor.commit();
+	}
+
+	public static String getString(Context context) {
+		SharedPreferences sPreferences = context.getSharedPreferences(SP_NAME, Context.MODE_PRIVATE);
+		return sPreferences.getString(SP_KEY_ID, "");
 	}
 }

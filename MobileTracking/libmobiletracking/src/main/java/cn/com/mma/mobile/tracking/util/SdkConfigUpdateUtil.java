@@ -42,6 +42,7 @@ public class SdkConfigUpdateUtil {
                         if (DeviceInfoUtil.isNetworkAvailable(context)) {
                             byte[] buffer = ConnectUtil.getInstance().performGet(configUrl);
                             if (buffer != null) {
+                                System.out.println("upload更新配置文件成功");
                                 sdkConfig = XmlUtil.doParser(new ByteArrayInputStream(buffer));
                                 //如果可以成功解析为SDK实体类,并且存在Company配置,缓存原始XML数据
                                 if (sdkConfig != null && sdkConfig.companies != null && sdkConfig.companies.size() > 0) {
@@ -59,6 +60,9 @@ public class SdkConfigUpdateUtil {
                                     }
                                     initOffLineCache(sdkConfig);
                                 }
+                            }else {
+                                System.out.println("upload配置文件没有成功");
+
                             }
 
                         }

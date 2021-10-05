@@ -1,13 +1,21 @@
 package cn.com.mma.mobile.tracking.api;
 
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.os.IBinder;
 import android.text.TextUtils;
 import android.view.View;
+
+import com.uodis.opendevice.aidl.OpenDeviceIdentifierService;
+
 import java.util.Timer;
 import java.util.TimerTask;
 import cn.com.mma.mobile.tracking.bean.Company;
 import cn.com.mma.mobile.tracking.bean.SDK;
+import cn.com.mma.mobile.tracking.util.DeviceInfoUtil;
 import cn.com.mma.mobile.tracking.util.LocationCollector;
 import cn.com.mma.mobile.tracking.util.Logger;
 import cn.com.mma.mobile.tracking.util.SdkConfigUpdateUtil;
@@ -41,10 +49,12 @@ public class Countly {
 
     //[本地测试]控制广播的开关
     public static boolean LOCAL_TEST = true;
+    public static boolean ISNEED_OAID = false;
 
     public static String ACTION_STATS_EXPOSE = "ACTION_STATS_EXPOSE";
     public static String ACTION_STATS_VIEWABILITY = "ACTION.STATS_VIEWABILITY";
     public static String ACTION_STATS_SUCCESSED = "ACTION.STATS_SUCCESSED";
+    public static String OAID = "unknow";
 
     private static Countly mInstance = null;
 
@@ -108,6 +118,16 @@ public class Countly {
             //监测配置更新
             SdkConfigUpdateUtil.sync(context, configURL);
 
+//            获取ADID;
+            DeviceInfoUtil.getDeviceAdid(context,sdk);
+
+            String modle = DeviceInfoUtil.getModel();
+
+            //判断设备的MODLE是否为华为
+            if(modle.contains("HONOR")){
+                getOAID(context);
+            }
+
         } catch (Exception e) {
             Logger.e("Countly init failed:" + e.getMessage());
         }
@@ -139,22 +159,76 @@ public class Countly {
     }
 
 
+
+    public String getOAID(Context context){
+
+
+        Intent bindIntent = new Intent("com.uodis.opendevice.OPENIDS_SERVICE");
+
+        bindIntent.setPackage("com.huawei.hwid");
+
+        context.bindService(bindIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+
+//        System.out.println("启动服务");
+
+        return OAID;
+
+    }
+
+    ServiceConnection serviceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service)
+
+        {
+//            System.out.println("建立AIDL服务链接");
+
+            OpenDeviceIdentifierService oaidService = OpenDeviceIdentifierService.Stub.asInterface(service);
+
+            try {
+
+                OAID = oaidService.getOaid();
+
+                boolean isTrackLimited = oaidService.isOaidTrackLimited();
+
+                ISNEED_OAID = true;
+
+
+            }catch (Exception e){
+
+            }
+
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+//            System.out.println("断开AIDL服务链接");
+
+        }
+
+    };
+
+
+
+
     /**
      * 普通点击事件监测接口
      * @param adURL 监测链接
      */
     public  void onClick(String adURL) {
 
-        triggerEvent(EVENT_CLICK, adURL, null);
+        triggerEvent(EVENT_CLICK, adURL, null,0);
     }
 
     /**
      * 普通曝光事件监测接口
      * @param adURL 监测链接
      */
-    public  void onExpose(String adURL) {
+    public  void onExpose(String adURL,View adview,int type) {
 
-        triggerEvent(EVENT_EXPOSE, adURL, null);
+
+        triggerEvent(EVENT_EXPOSE, adURL, adview,type);
     }
 
     /**
@@ -162,9 +236,18 @@ public class Countly {
      * @param adURL 监测链接
      * @param adView 监测广告视图对象
      */
-    public  void onExpose(String adURL, View adView) {
+    public void onExpose(String adURL, View adView) {
 
-        triggerEvent(EVENT_VIEWABILITY_EXPOSE, adURL, adView);
+//        adView.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//
+//              System.out.println("用户点击了View");
+//
+//            }
+//        });
+
+        triggerEvent(EVENT_VIEWABILITY_EXPOSE, adURL, adView,0);
     }
 
     /**
@@ -242,13 +325,13 @@ public class Countly {
 
 
 
-    private  void triggerEvent(String eventName, String adURL, View adView) {
-        triggerEvent(eventName, adURL, adView, 0);
+    private  void triggerEvent(String eventName, String adURL, View adView,int type) {
+        triggerEvent(eventName, adURL, adView, 0, type);
     }
 
 
 
-    private  void triggerEvent(String eventName, String adURL, View adView, int videoPlayType) {
+    private  void triggerEvent(String eventName, String adURL, View adView, int videoPlayType,int type) {
 
 
         if (sIsInitialized == false || mUrildBuilder == null) {
@@ -259,12 +342,13 @@ public class Countly {
             Logger.w("The URL parameter is illegal, it can't be null or empty!");
             return;
         }
+
         switch (eventName) {
             case EVENT_CLICK:
                 viewAbilityHandler.onClick(adURL);
                 break;
             case EVENT_EXPOSE:
-                viewAbilityHandler.onExpose(adURL);
+                viewAbilityHandler.onExpose(adURL,adView,type);
                 break;
             case EVENT_VIEWABILITY_EXPOSE:
                 viewAbilityHandler.onExpose(adURL, adView);

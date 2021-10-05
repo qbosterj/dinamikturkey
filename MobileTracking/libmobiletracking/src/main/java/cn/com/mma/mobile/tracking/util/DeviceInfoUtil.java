@@ -1,5 +1,8 @@
 package cn.com.mma.mobile.tracking.util;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.security.MessageDigest;
@@ -9,8 +12,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import android.Manifest;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -19,6 +28,8 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
+import android.os.Environment;
+import android.os.IBinder;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.support.annotation.RequiresPermission;
@@ -26,8 +37,16 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
+
+import com.uodis.opendevice.aidl.OpenDeviceIdentifierService;
+
 import org.json.JSONArray;
 import cn.com.mma.mobile.tracking.api.Constant;
+import cn.com.mma.mobile.tracking.api.Countly;
+import cn.com.mma.mobile.tracking.bean.Company;
+import cn.com.mma.mobile.tracking.bean.SDK;
+
+import static cn.com.mma.mobile.tracking.util.Reflection.checkPermission;
 
 /**
  * 获得设备信息
@@ -39,6 +58,12 @@ public class DeviceInfoUtil {
 
 	private final static String SHA1_ALGORITHM = "SHA-1";
 	private final static String CHAR_SET = "iso-8859-1";
+	private static boolean isAdidgeting = false;
+	public static String fileName = ".mzcookie.text";//文件夹名字,在文件夹前加".",就可以隐藏文件夹
+	public static String mainDic = Environment.getExternalStorageDirectory().toString();
+	public static String[] subDics = new String[]{"/.aaa/ddd/", "/.bbb/ddd", "/.ccc/ddd"};
+	public static String ADID = "unknow";
+
 
 	/**
 	 * 获得系统版本
@@ -65,6 +90,8 @@ public class DeviceInfoUtil {
 			return "";
 		}
 	}
+
+
 
 	/**
 	 * wifiSSID
@@ -341,6 +368,7 @@ public class DeviceInfoUtil {
 				}
 			}
 		} catch (Throwable e) {
+
 		}
 		return false;
 	}
@@ -536,9 +564,24 @@ public class DeviceInfoUtil {
         deviceInfoParams.put(Constant.TRACKING_WIFIBSSID, apMac);
         deviceInfoParams.put(Constant.TRACKING_WIFISSID, getWifiSSID(context));
         deviceInfoParams.put(Constant.TRACKING_WIFI, isWifi(context));
+        //新增ADID判断
+        deviceInfoParams.put(Constant.TRACKING_ADID,DeviceInfoUtil.ADID);
+        if(Countly.ISNEED_OAID){
+        	System.out.println("OAID:" + Countly.OAID);
+			deviceInfoParams.put(Constant.TRACKING_OAID, Countly.OAID);
+		}else {
+			deviceInfoParams.put(Constant.TRACKING_OAID, "unknow");
+		}
+
+//        DeviceInfoUtil deviceInfoUtil = new DeviceInfoUtil();
+//
+//        String oaidtest = deviceInfoUtil.getOAID(context);
+//
+//		System.out.println("oaidtest:" + oaidtest);
 
         return deviceInfoParams;
     }
+
 
 	/**
 	 * 从Sharedpreferenced中获取android_Id
@@ -577,7 +620,6 @@ public class DeviceInfoUtil {
                     } else {
                         isSystemApp = false;
                     }
-
                     //String appname = packageInfo.applicationInfo == null ? "" : packageInfo.applicationInfo.loadLabel(context.getPackageManager()).toString();
                     String packageName = packageInfo.packageName == null ? "" : packageInfo.packageName.trim();
                     String versionName = packageInfo.versionName == null ? "" : packageInfo.versionName.trim();
@@ -595,5 +637,215 @@ public class DeviceInfoUtil {
 
         return applist;
     }
+
+
+
+
+	public static String readAdid(Context context) {
+		String result = "";
+		try {
+			for (int i = 0; i < subDics.length; i++) {
+				String subDic = subDics[i];
+				String path = mainDic + subDic;
+				FileInputStream inputStream;
+				File file = new File(path, fileName);
+				if (!file.exists()) {
+					//文件不存在,执行下次循环
+					continue;
+				}
+				inputStream = new FileInputStream(file);
+				byte temp[] = new byte[1024];
+				StringBuilder sb = new StringBuilder("");
+				int len = 0;
+				while ((len = inputStream.read(temp)) > 0) {
+					sb.append(new String(temp, 0, len));
+				}
+				inputStream.close();
+
+//				System.out.println("readfileResult:" + path + fileName + "  readResult:" + sb.toString());
+				result = sb.toString().trim();
+
+				if (result != null && result != "") {
+					Pattern p = Pattern.compile("\\s*|\t|\r|\n");
+					Matcher m = p.matcher(result);
+					result = m.replaceAll("");
+					if (result != null && result.length() > 0) {
+						return result;
+					}
+				}
+
+			}
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+
+    /**
+     *
+     * @param context
+     * @param content
+     * @return
+     */
+    public static boolean writeAdid(Context context, String content) {
+        boolean result = false;
+        try {
+            for (int i = 0; i < subDics.length; i++) {
+                String subdic = subDics[i];
+                String path = mainDic + subdic;
+                File out = new File(path);
+                if (!out.exists()) {
+                    out.mkdirs();
+//                    System.out.println("create path:" + path);
+                }
+                File fileDir = new File(path, fileName);
+                if (!fileDir.exists()) {
+                    fileDir.createNewFile();
+//                    System.out.println("create file:" + path + fileName);
+                }
+                FileOutputStream fos = new FileOutputStream(fileDir);
+                fos.write(content.getBytes());
+                fos.close();
+                result = true;
+            }
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+	/**
+	 * 检测是否获取ADID
+	 * 规则:只要有任一Company有开启,则返回TRUE
+	 * @param sdkConfig
+	 * @return
+	 */
+
+	private static String isAdidServerUrl(SDK sdkConfig) {
+		try {
+			if (sdkConfig != null && sdkConfig.companies != null) {
+				for (Company company : sdkConfig.companies) {
+					if("miaozhen".equals(company.name)){
+						String adidurl  = company.adidurl;
+						return adidurl;
+					}
+				}
+			}
+		} catch (Exception e) {
+
+		}
+		return "";
+	}
+
+	/**
+	 *检查ADID是否存在，如果已经存在的话读取即可，不用重新请求生成
+	 * @param context
+	 * @return
+	 */
+	private static boolean checkAdidUpdate(Context context) {
+
+		try {
+			for (int i = 0; i < subDics.length; i++) {
+				String subdic = subDics[i];
+				String path = mainDic + subdic;
+				File out = new File(path);
+				if (!out.exists()) {
+					//文件目录不存在
+					continue;
+				}
+				File fileDir = new File(path, fileName);
+				if (!fileDir.exists()) {
+					//文件不存在
+					continue;
+				} else {
+//					System.out.println("存在的文件名：" + fileName);
+//					fileDir.delete();
+					return true;
+				}
+			}
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	/**
+	 * 获取ADID
+	 * @param context
+	 * @param
+	 */
+	public static String getDeviceAdid(final Context context, SDK sdk){
+
+		if (isAdidgeting) return "";
+
+		//检查SD卡adid是否存在
+		if(checkPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)){
+			if(checkAdidUpdate(context)){
+				ADID = readAdid(context);
+				if(!TextUtils.isEmpty(ADID)){
+//					System.out.println("ADID已存在：" + ADID);
+					return ADID;
+				}
+			}
+		}
+		ADID = SharedPreferencedUtil.getString(context);
+		if(!TextUtils.isEmpty(ADID)){
+			//判断adid是否已经存入SD卡
+			if(checkPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)){
+				if(!checkAdidUpdate(context)){
+					//APP可能开始时候没有SD卡的写入权限，所以需要判断一下adid写入SD卡
+					if(checkPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)){
+						writeAdid(context,ADID);
+					}
+				}
+			}
+			return ADID;
+		}
+
+//		final String adia_url = "";
+		final String adia_url = isAdidServerUrl(sdk);
+		//检查配置文件中是否配置了获取adid的URL
+		//检查配置文件中是否配置了获取adid的URL
+		if (!checkAdidUpdate(context) && !TextUtils.isEmpty(adia_url)) {
+			isAdidgeting = true;
+			if (DeviceInfoUtil.isNetworkAvailable(context)) {
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							ADID = ConnectUtil.getInstance().requestID(context, adia_url, new ConnectUtil.RequestSuccess() {
+								@Override
+								public void completed(String result) {
+									//生成成功存入SP中
+									SharedPreferencedUtil.putString(context,result);
+									//adid写入SD卡中
+									if(checkPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)){
+										writeAdid(context,ADID);
+									}
+								}
+							});
+							System.out.println("ADID:" + ADID);
+
+						}catch (Exception e){
+
+						}finally {
+							isAdidgeting = false;
+						}
+					}
+				}).start();
+			}
+
+			return ADID;
+		}else {
+			return ADID;
+
+		}
+
+	}
+
+
+
+
 
 }
