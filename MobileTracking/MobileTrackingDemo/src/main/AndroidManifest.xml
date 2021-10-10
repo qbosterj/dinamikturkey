@@ -24,13 +24,48 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name="cn.com.mma.mobile.tracking.demo.MainActivity"
+            android:name="cn.com.mma.mobile.tracking.demo.MenuActivity"
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+        </activity>
+
+        <activity
+            android:name="cn.com.mma.mobile.tracking.demo.NormalActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait">
+        </activity>
+
+        <activity
+            android:name="cn.com.mma.mobile.tracking.demo.DisplayActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait">
+        </activity>
+
+        <activity
+            android:name="cn.com.mma.mobile.tracking.demo.VideoActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait">
+        </activity>
+
+        <activity
+            android:name="cn.com.mma.mobile.tracking.demo.AutoVideoActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait">
+        </activity>
+        <activity
+            android:name="cn.com.mma.mobile.tracking.demo.ClickVideoActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait">
+        </activity>
+
+        <activity
+            android:name="cn.com.mma.mobile.tracking.demo.LandingPageActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait">
         </activity>
     </application>
 

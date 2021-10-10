@@ -103,6 +103,7 @@ public class AbilityWorker implements AbilityCallback {
     public void addWorker(String adURL, View adView, String impressionID, String explorerID, ViewAbilityStats result) {
 
         try {
+
             ViewAbilityExplorer existExplore = explorers.get(explorerID);
             KLog.d("addWorker->ID:" + explorerID + " existExplore:" + existExplore + "  url:" + adURL + "  adView" + adView);
             //当前Work池内已存在 停止并上报 使用新的监测覆盖

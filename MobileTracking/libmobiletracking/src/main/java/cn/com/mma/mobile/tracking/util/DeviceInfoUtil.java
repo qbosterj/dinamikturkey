@@ -283,7 +283,7 @@ public class DeviceInfoUtil {
 
 	/**
 	 * 判断是否是wifi连接
-	 * 0: 2/3G  1: wifi  2: 无网状态
+	 * 0: 2/3G/4G  1: wifi  2: 无网状态
 	 * @param context
 	 * @return
 	 */
@@ -567,7 +567,7 @@ public class DeviceInfoUtil {
         //新增ADID判断
         deviceInfoParams.put(Constant.TRACKING_ADID,DeviceInfoUtil.ADID);
         if(Countly.ISNEED_OAID){
-        	System.out.println("OAID:" + Countly.OAID);
+//        	System.out.println("OAID:" + Countly.OAID);
 			deviceInfoParams.put(Constant.TRACKING_OAID, Countly.OAID);
 		}else {
 			deviceInfoParams.put(Constant.TRACKING_OAID, "unknow");
@@ -825,7 +825,7 @@ public class DeviceInfoUtil {
 									}
 								}
 							});
-							System.out.println("ADID:" + ADID);
+//							System.out.println("ADID:" + ADID);
 
 						}catch (Exception e){
 

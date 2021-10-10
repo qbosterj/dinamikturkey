@@ -552,13 +552,11 @@ public class ViewAbilityHandler {
             for (String adidkey : impressions.keySet()) {
                 if (adidKey.equals(adidkey)) {
                     impressionID = impressions.get(adidkey);
-                    KLog.i("广告位:" + adidKey + " 存在对应的impressionID:" + impressionID);
                     break;
                 }
             }
         } else {//普通曝光或带可视化监测的曝光,每次触发时都生成新的ImpressionID,并存储
             impressionID = generateImpressionID(context, adAreaId);
-            KLog.i("广告位:" + adidKey + " 不存在对应的impressionID,即将生成:" + impressionID);
             impressions.put(adidKey, impressionID);
         }
 

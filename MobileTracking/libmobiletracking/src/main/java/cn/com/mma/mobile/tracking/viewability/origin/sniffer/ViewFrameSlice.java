@@ -268,12 +268,13 @@ public class ViewFrameSlice implements Serializable {
                 // 如果相邻的视图(容器)是隐藏、透明、或是frame=0，则不再与adview进行对比
                 boolean itemShow = isSubViewNormal(otherView);
 
+
+
                 if (!itemShow) {
                     isWindowShowed = itemShow;// 赋值全局变量
-//                    debugE("index:" + i + " view:" + otherView + "  is`t showing:" + isShowed);
+//                   System.out.println("index:" + i + " view:" + otherView + "  is`t showing:" + itemShow);
                     continue;
                 }
-
                 checkIntersects(adView, otherView);
 //
 //			// 遍历的view如果是个布局容器，则继续深度遍历其子view是否和adview有交集
@@ -470,6 +471,7 @@ public class ViewFrameSlice implements Serializable {
     private boolean isSubViewNormal(View contentView) {
         Rect currentViewRect = new Rect();
         boolean currentVisible = contentView.getGlobalVisibleRect(currentViewRect);
+
         return currentVisible && checkVisibled(contentView);
     }
 
@@ -492,6 +494,7 @@ public class ViewFrameSlice implements Serializable {
         } catch (Throwable e) {
             e.printStackTrace();
         }
+
         return true;
     }
 

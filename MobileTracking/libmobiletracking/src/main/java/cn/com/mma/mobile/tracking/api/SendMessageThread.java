@@ -58,7 +58,7 @@ public class SendMessageThread extends Thread {
                     return;
                 try {
                     String eventData = (String) iterator.next();
-                    System.out.println("upload监测链接:" + eventData);
+//                    System.out.println("upload监测链接:" + eventData);
                     if (!TextUtils.isEmpty(eventData)) {
                         long eventExpireTime = SharedPreferencedUtil.getLong(context, spName, eventData);
                         if (eventExpireTime > System.currentTimeMillis()) {
@@ -72,8 +72,6 @@ public class SendMessageThread extends Thread {
 
                             byte[] response = connectUtil.performGet(eventData);
                             if (response == null) {
-                                System.out.println("upload返回结果为NULL:");
-
                                 handleFailedResult(eventData, eventExpireTime);
                                 return;
                             } else {

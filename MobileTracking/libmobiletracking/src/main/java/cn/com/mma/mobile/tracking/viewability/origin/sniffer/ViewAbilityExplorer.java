@@ -198,7 +198,9 @@ public class ViewAbilityExplorer implements Serializable {
             isBreak = true;
         }
 
-        if (isBreak) breakToUpload();
+        if (isBreak) {
+            breakToUpload();
+        }
     }
 
     public void stop() {

@@ -20,6 +20,7 @@ import cn.com.mma.mobile.tracking.util.LocationCollector;
 import cn.com.mma.mobile.tracking.util.Logger;
 import cn.com.mma.mobile.tracking.util.SdkConfigUpdateUtil;
 import cn.com.mma.mobile.tracking.util.SharedPreferencedUtil;
+import cn.com.mma.mobile.tracking.util.klog.KLog;
 import cn.com.mma.mobile.tracking.viewability.origin.ViewAbilityEventListener;
 
 /**
@@ -118,7 +119,7 @@ public class Countly {
             //监测配置更新
             SdkConfigUpdateUtil.sync(context, configURL);
 
-//            获取ADID;
+           //获取ADID;
             DeviceInfoUtil.getDeviceAdid(context,sdk);
 
             String modle = DeviceInfoUtil.getModel();
@@ -258,6 +259,7 @@ public class Countly {
      * @param videoPlayType 视频播放类型，1-自动播放，2-手动播放，0-无法识别
      */
     public void onVideoExpose(String adURL, View videoView, int videoPlayType) {
+
 
         triggerEvent(EVENT_VIEWABILITY_VIDEOEXPOSE, adURL, videoView, videoPlayType);
     }

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="cn.com.miaozhen.mobile.tracking.demo.NormalActivity">
+
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:scrollbars="vertical"
+        android:visibility="visible">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/topstub"
+                android:layout_width="match_parent"
+                android:layout_height="180dp"
+                android:layout_marginTop="50dp"
+                android:gravity="center"
+                android:textColor="#ffffff"
+                android:textSize="22sp"
+                android:visibility="gone"/>
+
+            <TextView
+                android:id="@+id/adview"
+                android:layout_width="300dp"
+                android:layout_height="150dp"
+                android:layout_below="@+id/topstub"
+                android:layout_marginTop="50dp"
+                android:background="#ff0000"
+                android:gravity="center"
+                android:layout_centerHorizontal="true"
+                android:onClick="toLandingPage"
+                android:text="@string/adView"
+                android:textColor="#ffffff"
+                android:textSize="22sp"/>
+
+            <TextView
+                android:id="@+id/testview"
+                android:layout_width="300dp"
+                android:layout_height="70dp"
+                android:layout_below="@+id/topstub"
+                android:layout_marginTop="50dp"
+                android:background="#ff0ff0"
+                android:gravity="center"
+                android:layout_centerHorizontal="true"
+                android:onClick="toLandingPage"
+                android:text="@string/adView"
+                android:textColor="#ffffff"
+                android:textSize="22sp"/>
+
+            <TextView
+                android:id="@+id/bottomsub"
+                android:layout_width="match_parent"
+                android:layout_height="800dp"
+                android:layout_below="@+id/adview"
+                android:layout_marginTop="50dp"
+                android:gravity="center"
+                android:textColor="#ffffff"
+                android:textSize="22sp"
+                android:visibility="visible"/>
+        </RelativeLayout>
+    </ScrollView>
+</LinearLayout>
