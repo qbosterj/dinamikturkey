@@ -1561,6 +1561,13 @@
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
+                    <!-- 判断广告视图view是否有CBR -->
+                    <argument>
+                        <key>ImpressionType</key>
+                        <value>rbtr</value>
+                        <urlEncode>true</urlEncode>
+                        <isRequired>true</isRequired>
+                    </argument>
                     <argument>
                         <key>AdviewabilityRecord</key>
                         <value>vrc</value>

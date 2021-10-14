@@ -9,7 +9,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="cn.com.miaozhen.mobile.tracking.demo.NewMainActivity">
+    tools:context="cn.com.mma.mobile.tracking.demo.NewMainActivity">
 
     <TextView
         android:id="@+id/ad_url"
