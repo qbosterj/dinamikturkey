@@ -25,6 +25,8 @@ public class AbilityEngine implements ViewAbilityPresenter {
     private AbilityHandler engineHandler = null;
     private static final int MESSAGE_ONEXPOSE = 0x102;
     private static final int MESSAGE_ONSTOP = 0x103;
+    private static final int MESSAGE_STOPFORSTRONGINTERACT = 0x104;
+
 
     public AbilityEngine(Context context, ViewAbilityEventListener eventListener, ViewAbilityConfig viewAbilityConfig) {
         mContext = context;
@@ -49,6 +51,15 @@ public class AbilityEngine implements ViewAbilityPresenter {
         message.obj = explorerID;
         engineHandler.sendMessage(message);
     }
+
+
+    @Override
+    public void stopForStrongInteract(String explorerID) {
+        Message message = engineHandler.obtainMessage(MESSAGE_STOPFORSTRONGINTERACT);
+        message.obj = explorerID;
+        engineHandler.sendMessage(message);
+    }
+
 
     private class AbilityHandler extends Handler {
 
@@ -78,6 +89,10 @@ public class AbilityEngine implements ViewAbilityPresenter {
                     case MESSAGE_ONSTOP:
                         String explorerID = (String) msg.obj;
                         abilityWorker.stopWorker(explorerID);
+                        break;
+
+                    case MESSAGE_STOPFORSTRONGINTERACT:
+                        abilityWorker.stopWorkerForStrongInteract((String) msg.obj);
                         break;
                     default:
                         break;

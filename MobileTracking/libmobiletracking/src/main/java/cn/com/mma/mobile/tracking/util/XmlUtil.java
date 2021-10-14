@@ -186,6 +186,8 @@ public class XmlUtil {
                         }
                         if ("separator".equals(elementName))
 							company.separator = parser.nextText();
+                        if ("adidurl".equals(elementName))
+                            company.adidurl = parser.nextText();
 						if ("equalizer".equals(elementName))
 							company.equalizer = parser.nextText();
 						if ("timeStampUseSecond".equals(elementName))

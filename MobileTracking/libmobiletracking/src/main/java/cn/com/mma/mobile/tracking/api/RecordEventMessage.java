@@ -90,7 +90,7 @@ public class RecordEventMessage {
                     String value = argument.value;
                     arguments.add(argument);
                     if (!TextUtils.isEmpty(value)) {
-                        //过滤掉URL中和Arguments重复的保留字段
+                        //过滤掉URL中和Arguments重复的保留字段去燥
                         String argumentValue = separator + value + equalizer;
                         if (filteredURL.contains(argumentValue)) {
                             String regex = argumentValue + "[^" + separator + "]*";
@@ -137,7 +137,18 @@ public class RecordEventMessage {
                     builder.append(argumentValue);
                     builder.append(equalizer);
                     builder.append(LocationCollector.getInstance(context).getLocation());
-                } else {
+                }else if(argumentKey.equals(Constant.TRACKING_OAID)){
+                    builder.append(separator);
+                    builder.append(argumentValue);
+                    builder.append(equalizer);
+                    builder.append(deviceInfoParams.get(argumentKey));
+                }else if(argumentKey.equals(Constant.TRACKING_ADID)){   //新增ADID
+                    builder.append(separator);
+                    builder.append(argumentValue);
+                    builder.append(equalizer);
+                    builder.append(deviceInfoParams.get(argumentKey));
+                }
+                else {
                     builder.append(separator);
                     builder.append(argumentValue);
                     builder.append(equalizer);
@@ -172,6 +183,7 @@ public class RecordEventMessage {
         String exposeURL = builder.toString();
         long expirationTime = getEventExpirationTime(company, timestamp);
         //Logger.d(" exposeURL:" + exposeURL + "   expirationTime is:" + expirationTime);
+        //在这里添加立即发送逻辑
         SharedPreferencedUtil.putLong(context, SharedPreferencedUtil.SP_NAME_NORMAL, exposeURL, expirationTime);
 
         //检查是否可以上报APPLIST

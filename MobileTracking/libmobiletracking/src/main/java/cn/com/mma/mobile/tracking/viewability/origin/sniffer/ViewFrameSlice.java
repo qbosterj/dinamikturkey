@@ -10,8 +10,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import cn.com.mma.mobile.tracking.api.Constant;
 import cn.com.mma.mobile.tracking.util.klog.KLog;
 import cn.com.mma.mobile.tracking.viewability.common.ViewHelper;
+import cn.com.mma.mobile.tracking.viewability.origin.support.AtlantisUtil;
+import cn.com.mma.mobile.tracking.viewability.origin.support.Rectangle;
 
 
 /**
@@ -44,17 +51,31 @@ public class ViewFrameSlice implements Serializable {
     //2s 是否前台运行 0=后台或遮挡 1=前台
     private int isForground;
     //2n 覆盖比例 0.00 - 1.00
-    private float coverRate;
+    private double coverRate;
 
     // 结合所有参数判断adView是否可视化 0=不可见 1=可见
     private int visibleAbility;
     // 当前广告是否可测量 0为不可见 1为可见 //默认可见
     //private int measureAbility = 0;
+    //判断广告是否在Window窗体之内
+    private boolean isWindowShowed = false;
+
+    /** 存放与广告视图覆盖的区域的Rect */
+
+
+
+    private List<Rectangle> coverAreaList = null;
+    Set<String> coverFrameSet = null;
+
 
     public ViewFrameSlice(View adView, Context context) {
         try {
             //时间戳
             captureTime = System.currentTimeMillis();
+
+            coverAreaList = new ArrayList<Rectangle>();
+
+            coverFrameSet = new HashSet<String>();
 
             //AdView尺寸:宽X高
             int width = adView.getWidth();
@@ -97,15 +118,36 @@ public class ViewFrameSlice implements Serializable {
             //int visbleHeight = visibleRect.bottom - Math.abs(visibleRect.top);
             visibleSize = visbleWidth + "x" + visbleHeight;
 
+            // 如果广告视图自身有问题，则不再统计cover_rate和cover_frame，截图照常
+            isWindowShowed = isShowing(adView);
 
-            //覆盖率(被) 可视区域尺寸/视图原尺寸
-            //float coverRate = 1.0f - (visbleWidth * visbleHeight) / (width * height);
-            if (width * height == 0) {
-                coverRate = 1.0f;
+            if (!isWindowShowed) {
+                coverRate = 1.00;
+//                debugE("the adview:" + contentView + "  is`t show,no need for traverseParent");
             } else {
-                double temp = 1.0f - (visbleWidth * visbleHeight) * 1.0f / (width * height) * 1.0f;
-                coverRate = (float) Math.round(temp * 100) / 100;
+                // 开始遍历父节上的subview
+                traverseParent(adView);
+
+                double totalArea = 0.00;
+
+                // 计算被覆盖率
+                if (coverAreaList.size() > 0) {
+                    AtlantisUtil au = new AtlantisUtil();
+                    totalArea = au.calOverlapArea(coverAreaList);
+                }
+                //计算广告视图自身在Windows窗体中实际展示的面积大小
+                Rect viewRect = new Rect();
+                adView.getGlobalVisibleRect(viewRect);
+
+                double adArea = adView.getWidth() * adView.getHeight();
+                double windowCoverArea = adArea - (viewRect.right - viewRect.left) * (viewRect.bottom - viewRect.top);
+
+                double temp = (totalArea + windowCoverArea) / adArea;
+                coverRate = (double) Math.round(temp * 100) / 100;
+//                System.out.println("adArea:" + adArea + "  total:" + totalArea + "  coverrate:" + coverRate + "  temp:" + temp);
+
             }
+
 
             //屏幕是否点亮
             screenOn = ViewHelper.isScreenOn(adView) ? 1 : 0;
@@ -116,8 +158,8 @@ public class ViewFrameSlice implements Serializable {
             Rect selfRect = new Rect();
             adView.getLocalVisibleRect(selfRect);
 
-//            adWindowRect = visibleRect;
-//            adLocalRect = selfRect;
+            coverAreaList = null;
+            coverFrameSet = null;
 
             KLog.i("=================ViewFrameSlice Constructor begin ======================");
             DisplayMetrics dm = context.getResources().getDisplayMetrics();
@@ -177,9 +219,10 @@ public class ViewFrameSlice implements Serializable {
         return isForground;
     }
 
-    public float getCoverRate() {
+    public double getCoverRate() {
         return coverRate;
     }
+
 
 
     /**
@@ -196,6 +239,304 @@ public class ViewFrameSlice implements Serializable {
         }
         return (visibleAbility == 1);
     }
+
+    /**
+     * 遍历对比父视图以及同层级下的子视图
+     *
+     * @param adView 广告视图
+     * @param
+     */
+    private void traverseParent(View adView) {
+
+        View contentView = adView;
+
+        // 从当前view找到父类布局容器，然后逐层向上(superview)遍历
+        while (contentView.getParent() instanceof ViewGroup) {
+            // 父类容器
+            ViewGroup currentParent = (ViewGroup) contentView.getParent();
+            // getClipBounds() require API23
+
+            int start = indexOfViewInParent(contentView, currentParent);
+            int childCount = currentParent.getChildCount();
+//            System.out.println("indexOfViewInParent:" + start + "  parent`s child count:" + childCount);
+            // 当前视图的下一个index和adview对比frame是否有交叉
+            for (int i = start + 1; i < childCount; i++) {
+
+                View otherView = currentParent.getChildAt(i);
+
+                //checkFrameBounds(otherView);
+                // 如果相邻的视图(容器)是隐藏、透明、或是frame=0，则不再与adview进行对比
+                boolean itemShow = isSubViewNormal(otherView);
+
+
+
+                if (!itemShow) {
+                    isWindowShowed = itemShow;// 赋值全局变量
+//                   System.out.println("index:" + i + " view:" + otherView + "  is`t showing:" + itemShow);
+                    continue;
+                }
+                checkIntersects(adView, otherView);
+//
+//			// 遍历的view如果是个布局容器，则继续深度遍历其子view是否和adview有交集
+                if (otherView instanceof ViewGroup) {
+                    // traverseParent(otherView);
+                    ViewGroup subviewGroup = (ViewGroup) otherView;
+                    traverseSubviews(adView, subviewGroup, coverFrameSet);
+                }
+
+            }
+            // 当前parent视图赋值给contentView，开始下一个遍历
+            contentView = currentParent;
+//            debugD("*************************************************************");
+        }
+
+    }
+
+
+    /**
+     * 遍历右半子树上布局容器下的所有view是否和目标view有交集
+     * @param adview 目标view
+     * @param subview 容器下的所有view
+     */
+    public void traverseSubviews(View adview, ViewGroup subview, Set<String> coverList) {
+        // int idex = indexOfViewInParent(adview, subview);
+        int childCount = subview.getChildCount();
+
+//        debugD("@@@@@@@@@@@@@@@@@@@@@" + subview.toString()  );
+//        System.out.println("traverseSubviews:" + subview + "  child count:" + childCount);
+
+        // 遍历当前视图(容器)的所有子视图，对比目标view的frame是否有交叉
+        for (int i = 0; i < childCount; i++) {
+            View otherView = subview.getChildAt(i);
+
+//            debugD("^^^^^^^^^^^^^^^^^^^^^^^^^" + otherView.toString()  );
+
+
+            //checkFrameBounds(otherView);
+            // 如果相邻的视图(容器)是隐藏、透明、或是frame=0，则不再与adview进行对比
+            boolean isShowed = isSubViewNormal(otherView);
+            if (!isShowed) {
+//                debugE("subview index:" + i + " view:" + otherView + "  is`t showing:");
+                continue;
+            }
+
+            checkIntersects(adview, otherView);
+
+            // 子视图又是容器，则继续深度遍历，直至最底层
+            if (otherView instanceof ViewGroup) {
+                ViewGroup subviewGroup = (ViewGroup) otherView;
+                traverseSubviews(adview, subviewGroup, coverList);
+            }
+        }
+
+    }
+
+
+
+    /**
+     * 检查广告视图和对比目标视图是否有覆盖
+     * @param adView
+     * @param otherView
+     */
+    @SuppressLint("NewApi")
+    private void checkIntersects(View adView, View otherView) {
+//        debugD("#############" + adView.toString() + "########" + otherView.toString());
+
+        // 固定的广告视图的frame
+        Rect viewRect = new Rect();
+        adView.getGlobalVisibleRect(viewRect);
+        // 当前index下视图的frame
+        Rect otherViewRect = new Rect();
+        Point viewOffset = new Point();
+        otherView.getGlobalVisibleRect(otherViewRect, viewOffset);
+
+        //通过对比view的layout和其父layout，判断是否允许剪切超出视图区域部分，默认是判断，以便在4.4.2版本下如果
+        ViewGroup currentGroup = null;
+        ViewGroup fatherGroup = null;
+        boolean isClipChildren = true;
+        if (Build.VERSION.SDK_INT >= 18) {// above 4.4.2
+            if (otherView.getParent() instanceof ViewGroup) {
+//                debugD("#####是容器" + adView.toString() + "########" + otherView.toString());
+                currentGroup = (ViewGroup) otherView.getParent();
+                if (currentGroup != null && currentGroup.getParent() instanceof ViewGroup) {
+//                    debugD("#####再进入是容器" + adView.toString() + "########" + otherView.toString());
+
+                    fatherGroup = (ViewGroup) currentGroup.getParent();
+                    if (fatherGroup != null) {
+                        isClipChildren = fatherGroup.getClipChildren();
+                        //debugE("isClipChildren:"+isClipChildren);
+                    }
+                }
+            }
+        }
+        if (!isClipChildren) {
+            // 如果view有相对自身偏移量(margin_TOP)，则加上偏移量进行计算覆盖区域
+            //otherViewRect.left += (viewOffset.x - otherViewRect.left);//=viewOffset.x
+            //otherViewRect.top += (viewOffset.y - otherViewRect.top);//=viewOffset.y
+            otherViewRect.left = viewOffset.x;
+            otherViewRect.top = viewOffset.y;
+        }
+
+        //如果view的父视图(layout)有偏移量(margin OR Panding)，则计算实际可视覆盖区域 rect+localRect+父容器panding
+        //TEST 目前有问题，当父layout之间有约束时，即便设置了相关panding属性，但是由于各种约束，panding不会生效，导致计算出来的frame还是有问题
+        int pandingLeft = 0;
+        int pandingTop = 0;
+        if (otherView.getParent() instanceof ViewGroup) {
+            ViewGroup currentParent = (ViewGroup) otherView.getParent();
+            pandingLeft = currentParent.getPaddingLeft();
+            pandingTop = currentParent.getPaddingTop();
+        }
+        if (pandingLeft != 0 || pandingTop != 0) {
+            Rect localRect = new Rect();
+            // view相对自身的位置，一般为左上角0,0;右下角width,height
+            otherView.getLocalVisibleRect(localRect);
+            otherViewRect.left += (localRect.left + pandingLeft);
+            otherViewRect.top += (localRect.top + pandingTop);
+//            System.out.println("visualLeft:" + otherViewRect.left + "  visualTop:" + otherViewRect.top);
+        }
+
+        // 是否相交a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom
+
+        boolean isIntersets = Rect.intersects(viewRect, otherViewRect);
+//
+//        debugV(" checkIntersects:" + viewRect + "  otherView:" + otherView + "  child`rect:" + otherViewRect
+//                + "  intersects:" + isIntersets + "   isViewgroup:" + (otherView instanceof ViewGroup));
+
+        // 如果对比的两个视图有交叉或覆盖，交叉或覆盖的部分存储到list内
+        if (isIntersets) {
+
+//            debugD("#############" + adView.toString() + "########" + otherView.toString());
+
+            valOverlapRect(viewRect, otherViewRect);
+
+
+        }
+
+    }
+
+
+    /**
+     * 通过两个视图的Rect获取相交区域的frame
+     * @param adRect 广告视图
+     * @param otherRect 子视图
+     */
+    private void valOverlapRect(Rect adRect, Rect otherRect) {
+        // 方法一
+        int overlapWidth = 0;
+        int overlapHeight = 0;
+        int overlapLeft = 0;
+        int overlapRight = 0;
+        int overlapTop = 0;
+        int overlapBottom = 0;
+
+        // 坐标系左上坐标x点
+        overlapLeft = Math.max(adRect.left, otherRect.left);
+        // 坐标系左上坐标y点
+        overlapTop = Math.max(adRect.top, otherRect.top);
+        // 坐标系右下坐标x点
+        overlapRight = Math.min(adRect.right, otherRect.right);
+        // 坐标系右下坐标y点
+        overlapBottom = Math.min(adRect.bottom, otherRect.bottom);
+
+        overlapWidth = Math.abs(overlapRight - overlapLeft);
+        overlapHeight = Math.abs(overlapBottom - overlapTop);
+
+        StringBuilder item = new StringBuilder();
+        item.append(overlapLeft);
+        item.append(Constant.DIVIDE_MULT);
+        item.append(overlapTop);
+        item.append(Constant.DIVIDE_MULT);
+        item.append(overlapWidth);
+        item.append(Constant.DIVIDE_MULT);
+        item.append(overlapHeight);
+        // 存储jsondata:覆盖视图的x,y和width,height
+        coverFrameSet.add(item.toString()); // (leftXtopXwidthXheight)
+
+        // 存储RECT
+        Rect overlapRect = new Rect();
+        boolean success = overlapRect.setIntersect(adRect, otherRect);
+
+        Rectangle rect = new Rectangle();
+        rect.x1 = overlapRect.left;
+        rect.y1 = overlapRect.top;
+        rect.x2 = overlapRect.right;
+        rect.y2 = overlapRect.bottom;
+
+        // 如果success,overlapRect的left,top,right,bottom便是相交区域的bounds
+//        debugE("valOverlapRect:[" + item.toString() + "]   " + success + "   voerlap:" + overlapRect+"   rect:"+rect);
+
+        coverAreaList.add(rect);
+    }
+
+    private boolean isSubViewNormal(View contentView) {
+        Rect currentViewRect = new Rect();
+        boolean currentVisible = contentView.getGlobalVisibleRect(currentViewRect);
+
+        return currentVisible && checkVisibled(contentView);
+    }
+
+    /**
+     * 判断当前view是否是透明或隐藏
+     *
+     * @param contentView
+     * @return
+     */
+    private boolean checkVisibled(View contentView) {
+        try {
+            // visible&hidden
+            if (!(contentView.getVisibility() == View.VISIBLE)) {
+                return false;
+            }
+            // transparent
+            if (contentView.getAlpha() <= 0.1f) {// require min api 11
+                return false;
+            }
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+
+        return true;
+    }
+
+
+
+    /**
+     * 当前视图在父视图的层级位置index
+     *
+     * @param view
+     *            当前视图
+     * @param parent
+     *            父视图
+     * @return
+     */
+    private int indexOfViewInParent(View view, ViewGroup parent) {
+        int index;
+        int childCount = parent.getChildCount();
+        for (index = 0; index < childCount; index++) {
+            if (parent.getChildAt(index) == view)
+                break;
+        }
+        return index;
+    }
+
+
+
+    /**
+     * 判断adview的superview是否正常显示
+     * @return
+     */
+    private boolean isShowing(View contentView) {
+        // 当前广告视图是否被裁减&&当前广告视图是透明或隐藏
+//			return checkFrameBounds(contentView) && checkVisibled(contentView);
+        Rect currentViewRect = new Rect();
+        Point offsets = new Point();
+        // 如果contentView的visibility=gone或width,height都为0，返回为false(Rect=(0,0,0,0))
+        boolean currentVisible = contentView.getGlobalVisibleRect(currentViewRect,offsets);// left,top,right,bottom
+
+        return currentVisible;
+
+    }
+
 
 
     /**

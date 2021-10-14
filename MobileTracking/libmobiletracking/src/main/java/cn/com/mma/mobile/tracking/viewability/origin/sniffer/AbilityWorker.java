@@ -103,6 +103,7 @@ public class AbilityWorker implements AbilityCallback {
     public void addWorker(String adURL, View adView, String impressionID, String explorerID, ViewAbilityStats result) {
 
         try {
+
             ViewAbilityExplorer existExplore = explorers.get(explorerID);
             KLog.d("addWorker->ID:" + explorerID + " existExplore:" + existExplore + "  url:" + adURL + "  adView" + adView);
             //当前Work池内已存在 停止并上报 使用新的监测覆盖
@@ -134,6 +135,30 @@ public class AbilityWorker implements AbilityCallback {
             existExplore.stop();
             //explorers.remove(existExplore);
             explorers.remove(explorerID);
+        }
+    }
+
+
+
+    /**
+     * 产生强交互行为，停止监测立即上报
+     */
+    public void stopWorkerForStrongInteract(String explorerID) {
+        ViewAbilityExplorer existExplore = explorers.get(explorerID);
+        KLog.d("stopWorker->ID:" + explorerID + " existExplore:" + existExplore);
+        //当前Work池内存在 停止并上报，
+        if (existExplore != null) {
+            KLog.w("当前广告位:" + explorerID + " 存在,产生强交互行为，满足可视，停止监测并UPLOAD!");
+            //设置为强交互行为
+            existExplore.setStrongInteract(true);
+            try {
+                existExplore.breakToUpload();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            //强交互行为不移除中点监测任务
+//            existExplore.stop();
+//            explorers.remove(explorerID);
         }
     }
 
@@ -208,6 +233,7 @@ public class AbilityWorker implements AbilityCallback {
                 long cost = end - start;
                 cacheIndex++;
 
+//                System.out.println("index:" + cacheIndex + " cost:" + cost + "ms, workExplorers length:" + len);
                 KLog.d("index:" + cacheIndex + " cost:" + cost + "ms, workExplorers length:" + len);
                 KLog.v("<-----------------------------Time Line end" + " [" + Thread.currentThread().getId() + "]" + "--------------------------------------------------->");
             } catch (Exception e) {

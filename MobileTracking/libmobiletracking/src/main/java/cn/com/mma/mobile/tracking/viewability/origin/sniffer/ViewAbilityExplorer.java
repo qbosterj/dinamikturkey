@@ -67,6 +67,9 @@ public class ViewAbilityExplorer implements Serializable {
     /* 当前监测满足可视曝光时长 从URL中获取,缺省使用config */
     private int exposeValidDuration;
 
+    /* 来自强交互行为曝光 */
+    private boolean isStrongInteract = false;
+
 
     public ViewAbilityExplorer(String explorerID, String adURL, View adView, String impressionID, ViewAbilityConfig config, ViewAbilityStats result) {
         this.explorerID = explorerID;
@@ -131,6 +134,12 @@ public class ViewAbilityExplorer implements Serializable {
         return abilityStatus;
     }
 
+    public void setStrongInteract(boolean strongInteract) {
+        isStrongInteract = strongInteract;
+        //强交互行为，主动设置曝光性为可见曝光
+        viewabilityState = true;
+    }
+
 
     /**
      * 开启可视化监测
@@ -142,6 +151,12 @@ public class ViewAbilityExplorer implements Serializable {
                 //如果继续持有AdView的引用,开启监测并
                 if (adView != null) {
                     ViewFrameSlice itemSlice = new ViewFrameSlice(adView, context);
+
+                    //如果覆盖率达到了100%
+                    if(itemSlice.getCoverRate() == 1.0){
+
+                    }
+
                     viewFrameBlock.onPush(itemSlice);
                 }
 
@@ -183,7 +198,9 @@ public class ViewAbilityExplorer implements Serializable {
             isBreak = true;
         }
 
-        if (isBreak) breakToUpload();
+        if (isBreak) {
+            breakToUpload();
+        }
     }
 
     public void stop() {
@@ -267,6 +284,19 @@ public class ViewAbilityExplorer implements Serializable {
                 sb.append(equalizer);
                 sb.append(String.valueOf(viewAbilityStats.getVideoPlayType()));
             }
+
+            //如果是强交互行为，追加vk=1，代表此方式达成可见曝光
+            if (isStrongInteract) {
+                String strongInteractArgument = viewAbilityStats.get(ViewAbilityStats.ADVIEWABILITY_STRONG_INTERACT);
+                if (!TextUtils.isEmpty(strongInteractArgument)) {
+                    sb.append(separator);
+                    sb.append(strongInteractArgument);
+                    sb.append(equalizer);
+                    sb.append("1");
+                }
+            }
+
+
         } catch (Exception e) {
             e.printStackTrace();
         }

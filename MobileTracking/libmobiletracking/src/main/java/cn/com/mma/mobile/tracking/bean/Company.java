@@ -17,5 +17,6 @@ public class Company {
 	public String equalizer;
 	public boolean timeStampUseSecond;
     public Applist applist;
+    public String adidurl;
 
 }

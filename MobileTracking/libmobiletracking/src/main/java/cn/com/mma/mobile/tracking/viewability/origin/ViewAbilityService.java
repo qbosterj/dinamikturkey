@@ -69,4 +69,8 @@ public class ViewAbilityService {
     public void stopViewAbilityMonitor(String explorerID) {
         presenter.stopViewAbilityMonitor(explorerID);
     }
+
+    public void stopForStrongInteract(String explorerID) {
+        presenter.stopForStrongInteract(explorerID);
+    }
 }

@@ -25,21 +25,25 @@ public class Constant {
 	 */
 	public static String location = "";
 
-	public static final String TRACKING_MAC = "MAC";
-	public static final String TRACKING_LOCATION = "LBS";
-	public static final String TRACKING_OS = "OS";
-	public static final String TRACKING_OS_VERION = "OSVS";
-	public static final String TRACKING_WIFI = "WIFI";
-	public static final String TRACKING_NAME = "ANAME";
+	public static final String TRACKING_MAC = "MAC"; //mac地址
+	public static final String TRACKING_LOCATION = "LBS";//地理位置信息
+	public static final String TRACKING_OS = "OS";//设备系统Android 或者 IOS
+	public static final String TRACKING_OS_VERION = "OSVS"; //手机系统版本
+	public static final String TRACKING_WIFI = "WIFI"; //手机当前网络信息
+	public static final String TRACKING_NAME = "ANAME"; //APP 的名字
 	public static final String TRACKING_KEY = "AKEY";
-	public static final String TRACKING_SCWH = "SCWH";
-	public static final String TRACKING_TIMESTAMP = "TS";
-	public static final String TRACKING_ANDROIDID = "ANDROIDID";
+	public static final String TRACKING_SCWH = "SCWH"; //屏幕分辨率
+	public static final String TRACKING_TIMESTAMP = "TS"; //监测产生的时间戳
+	public static final String TRACKING_ANDROIDID = "ANDROIDID"; //AndroidID
 	public static final String TRACKING_AAID = "AAID";// 新加android google
 														// advertising id
 	public static final String TRACKING_TERM = "TERM";
 	public static final String TRACKING_WIFISSID = "WIFISSID";
 	public static final String TRACKING_WIFIBSSID = "WIFIBSSID";
+	//新增华为设备ID标识，OAID
+	public static final String TRACKING_OAID = "OAID";
+
+	public static final String TRACKING_ADID = "ADID";
 	public static final String TRACKING_IMEI = "IMEI";
 	public static final String TRACKING_RAWIMEI = "RAWIMEI";
 	public static final String TRACKING_ODIN = "ODIN";
@@ -47,9 +51,11 @@ public class Constant {
 	public static final String TRACKING_MUDS = "MUDS";
 	public static final String TRACKING_URL = "URL";
 	public static final String REDIRECTURL = "REDIRECTURL";
+	/** frame参数中的分隔符 */
+	public static final String DIVIDE_MULT = "X";
 
 	public static final String TRACKING_SDKVS = "SDKVS";
-	public static final String TRACKING_SDKVS_VALUE = "V2.0.3";
+	public static final String TRACKING_SDKVS_VALUE = "V2.1.0"; //SDK版本号
 
 	/**
 	 * 新版常量 Begin

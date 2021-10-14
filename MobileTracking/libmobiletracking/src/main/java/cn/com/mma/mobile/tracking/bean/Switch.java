@@ -14,4 +14,5 @@ public class Switch {
     public Map<String, String> encrypt;
     /* 可视化监测采集数据策略 */
     public int viewabilityTrackPolicy;
+
 }

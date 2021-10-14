@@ -3,7 +3,7 @@
 <!--媒体平台相关配置-->
 <config xsi:noNamespaceSchemaLocation="SDKSchema.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" >
 
-    <!--缓存队列 配置-->
+    <!--缓存队列配置-->
     <offlineCache>
       <!-- 缓存队列长度 Android SDK 中不生效，iOS SDK 中生效-->
         <length>0</length>
@@ -53,7 +53,6 @@
                 <paramKey>0b</paramKey>
             </signature>
 
-
             <switch>
                 <!-- 是否发送地理位置信息 -->
                 <isTrackLocation>true</isTrackLocation>
@@ -75,14 +74,14 @@
                 </encrypt>
 
                 <!--APPLIST上报配置-->
-                <!--<applist>-->
-                <!--&lt;!&ndash; applist上报地址 e.g. https:xxxx.com.cn/track/applist &ndash;&gt;-->
-                <!--<uploadUrl>https://p.attri.mobi/a</uploadUrl>-->
-                <!--&lt;!&ndash; applist上报时间间隔，单位为小时,配置为0时，不上报 &ndash;&gt;-->
-                <!--<uploadTime>24</uploadTime>-->
-                <!--&lt;!&ndash; applist上报是否使用gzip,缺省为true &ndash;&gt;-->
-                <!--<usegzip>true</usegzip>-->
-                <!--</applist>-->
+                <applist>
+                <!-- applist上报地址 e.g. https:xxxx.com.cn/track/applist -->
+                <uploadUrl>https://p.attri.mobi/a</uploadUrl>
+                <!-- applist上报时间间隔，单位为小时,配置为0时，不上报 -->
+                <uploadTime>24</uploadTime>
+                <!-- applist上报是否使用gzip,缺省为true -->
+                <usegzip>true</usegzip>
+                </applist>
             </switch>
 
             <!--上报字段配置-->
@@ -442,78 +441,107 @@
                 <offlineCacheExpiration>604800</offlineCacheExpiration>
                 <!-- 可视化监测采集策略 0 = TrackPositionChanged 位置改变时记录,1 = TrackVisibleChanged 可视改变时记录-->
                 <viewabilityTrackPolicy>1</viewabilityTrackPolicy>
+
                 <encrypt>
                     <MAC>md5</MAC>
                     <IDA>raw</IDA>
                     <IMEI>md5</IMEI>
                     <ANDROIDID>md5</ANDROIDID>
                 </encrypt>
-                <!--<applist>-->
-                <!--&lt;!&ndash; applist上报地址 e.g. https:xxxx.com.cn/track/applist &ndash;&gt;-->
-                <!--<uploadUrl>/apl/</uploadUrl>-->
-                <!--&lt;!&ndash; applist上报时间间隔，单位为小时,配置为0时，不上报&ndash;&gt;-->
-                <!--<uploadTime>24</uploadTime>-->
-                <!--<usegzip>false</usegzip>-->
-                <!--</applist>-->
+
+
+                <applist>
+                <!-- applist上报地址 e.g. https:xxxx.com.cn/track/applist -->
+                <uploadUrl>/apl/</uploadUrl>
+                <!-- applist上报时间间隔，单位为小时,配置为0时，不上报-->
+                <uploadTime>24</uploadTime>
+                <usegzip>false</usegzip>
+                </applist>
             </switch>
             <config>
                 <arguments>
                     <!--argument的必选和常用可选参数 key需确定-->
                     <!--必选函数-->
+                    <!-- 设备操作系统 -->
                     <argument>
                         <key>OS</key>
                         <value>mo</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
+                    <!-- 监测代码请求发生时的时间戳 -->
                     <argument>
                         <key>TS</key>
                         <value>mt</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
+                    <!--用户终端的 eth0 接口的 MAC 地址-->
                     <argument>
                         <key>MAC</key>
                         <value>m6a</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
+                    <!-- iOS IDFA(适用于iOS6及以上) -->
                     <argument>
                         <key>IDFA</key>
                         <value>m5</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
+                    <!-- Android IMEI MD5 值 -->
                     <argument>
                         <key>IMEI</key>
                         <value>m2</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
+                    <!-- Android IMEI 原值 -->
                     <argument>
                         <key>RAWIMEI</key>
                         <value>m3</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
+                    <!-- Android AndroidID 值 -->
                     <argument>
                         <key>ANDROIDID</key>
                         <value>m1a</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
+
+                    <!-- 华为OAID值 -->
+                    <argument>
+                        <key>OAID</key>
+                        <value>m11</value>
+                        <urlEncode>true</urlEncode>
+                        <isRequired>true</isRequired>
+                    </argument>
+
+                    <!--ADID值 -->
+                    <argument>
+                        <key>ADID</key>
+                        <value>m10</value>
+                        <urlEncode>true</urlEncode>
+                        <isRequired>true</isRequired>
+                    </argument>
+                    <!-- 客户端触发监测时的网络状态 -->
                     <argument>
                         <key>WIFI</key>
                         <value>mw</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
+                    <!-- APP的BundleId(PackageName) -->
                     <argument>
                         <key>AKEY</key>
                         <value>mp</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
+                    <!-- APP的名称 -->
                     <argument>
                         <key>ANAME</key>
                         <value>mn</value>
@@ -521,6 +549,7 @@
                         <isRequired>true</isRequired>
                     </argument>
                     <!--可选函数-->
+                    <!-- 设备的屏幕分辨率 -->
                     <argument>
                         <key>SCWH</key>
                         <value>mh</value>
@@ -541,36 +570,42 @@
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
+                    <!-- iOS OPENUDID 值 -->
                     <argument>
                         <key>OPENUDID</key>
                         <value>m0</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
+                    <!-- 设备的机型 -->
                     <argument>
                         <key>TERM</key>
                         <value>md</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
+                    <!-- 设备的系统版本号 -->
                     <argument>
                         <key>OSVS</key>
                         <value>me</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
+                    <!-- 设备的地理位置信息 -->
                     <argument>
                         <key>LBS</key>
                         <value>mm</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
+                    <!-- SDK版本号 -->
                     <argument>
                         <key>SDKVS</key>
                         <value>mv</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
+                    <!-- 监测代码需要重定向的 URL -->
                     <argument>
                         <key>REDIRECTURL</key>
                         <value>o</value>
@@ -580,6 +615,7 @@
                 </arguments>
                 <events>
                     <event>
+                        <!--事件监测配置(暂时没有使用)-->
                         <!--<name>m1</name>-->
                         <key>start</key>
                         <value>mb=start</value>
@@ -592,6 +628,7 @@
                         <urlEncode>true</urlEncode>
                     </event>
                 </events>
+                <!-- 监测代码中广告位标识符 -->
                 <Adplacement>
                     <argument>
                         <key>Adplacement</key>
@@ -601,119 +638,157 @@
                     </argument>
                 </Adplacement>
                 <viewabilityarguments>
+                    <!-- 可视化监测识别ID -->
                     <argument>
                         <key>ImpressionID</key>
                         <value>vf</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
+                    <!-- 判断广告视图view是否有CBR -->
+                    <argument>
+                        <key>ImpressionType</key>
+                        <value>br</value>
+                        <urlEncode>true</urlEncode>
+                        <isRequired>true</isRequired>
+                    </argument>
+                    <!-- 可视轨迹数据是否上报 -->
                     <argument>
                         <key>AdviewabilityRecord</key>
                         <value>va</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
+                    <!-- 可视化监测中采集的时间片信息 -->
                     <argument>
                         <key>AdviewabilityEvents</key>
                         <value>vd</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
+                    <!-- 可视化采集中每个时间片的时间戳，单位 毫秒 -->
                     <argument>
                         <key>AdviewabilityTime</key>
                         <value>1</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
+                    <!-- 广告素材尺寸 -->
                     <argument>
                         <key>AdviewabilityFrame</key>
                         <value>2</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
+                    <!-- 广告素材左上角坐标 -->
                     <argument>
                         <key>AdviewabilityPoint</key>
                         <value>3</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
+                    <!-- 广告素材透明度 -->
                     <argument>
                         <key>AdviewabilityAlpha</key>
                         <value>4</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
+                    <!-- 广告素材是否显示 -->
                     <argument>
                         <key>AdviewabilityShown</key>
                         <value>5</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
+                    <!-- 广告素材被覆盖率 -->
                     <argument>
                         <key>AdviewabilityCoverRate</key>
                         <value>6</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
+                    <!-- 广告素材可视尺寸 -->
                     <argument>
                         <key>AdviewabilityShowFrame</key>
                         <value>7</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
+                    <!-- APP是否在前台运行 -->
                     <argument>
                         <key>AdviewabilityForground</key>
                         <value>8</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
+                    <!-- 广告素材可见性 -->
                     <argument>
                         <key>AdviewabilityResult</key>
                         <value>vx</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
+                    <!-- 满足可视条件时的覆盖率 -->
                     <argument>
                         <key>AdviewabilityConfigArea</key>
                         <value>vh</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
+                    <!-- 满足可视条件时的时长 -->
                     <argument>
                         <key>AdviewabilityConfigThreshold</key>
                         <value>vi</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
+                    <!-- 视频广告素材的总播放时长 -->
                     <argument>
                         <key>AdviewabilityVideoDuration</key>
                         <value>vb</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
+                    <!-- 视频广告素材播放进度监测事件 -->
                     <argument>
                         <key>AdviewabilityVideoProgress</key>
                         <value>vc</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
+                    <!-- 视频广告素材的播放类型 -->
                     <argument>
                         <key>AdviewabilityVideoPlayType</key>
                         <value>vg</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
+                    <!-- 视频广告素材播放进度配置依次为:25%50%75%100% -->
                     <argument>
                         <key>AdviewabilityVideoProgressPoint</key>
                         <value>vj</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
+
+                    <!-- Strong interaction exposure -->
+                    <argument>
+                        <key>AdviewabilityStrongInteract</key>
+                        <value>vk</value>
+                        <urlEncode>true</urlEncode>
+                        <isRequired>true</isRequired>
+                    </argument>
+
                 </viewabilityarguments>
             </config>
             <separator>&amp;</separator>
             <!--<separator>&amp;</separator>-->
+            <!--ADID服务端地址-->
+            <adidurl>https://g.cn.miaozhen.com/x/k=adid</adidurl>
+
             <equalizer>=</equalizer>
+
             <!--如果设置true   timeStamper使用秒-->
             <timeStampUseSecond>true</timeStampUseSecond>
         </company>
@@ -1483,6 +1558,13 @@
                     <argument>
                         <key>ImpressionID</key>
                         <value>vimp</value>
+                        <urlEncode>true</urlEncode>
+                        <isRequired>true</isRequired>
+                    </argument>
+                    <!-- 判断广告视图view是否有CBR -->
+                    <argument>
+                        <key>ImpressionType</key>
+                        <value>rbtr</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>

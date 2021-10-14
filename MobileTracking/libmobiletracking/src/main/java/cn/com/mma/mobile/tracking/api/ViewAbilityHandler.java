@@ -111,7 +111,6 @@ public class ViewAbilityHandler {
 
     }
 
-
     /**
      * 普通点击监测
      * AdView=NULL,VideoType=0
@@ -119,8 +118,10 @@ public class ViewAbilityHandler {
      * @param originUrl
      */
     public void onClick(String originUrl) {
-        handlerOriginURL(originUrl, MonitorType.CLICK, null, 0);
+        handlerOriginURL(originUrl, MonitorType.CLICK, null, 0,0);
     }
+
+
 
     /**
      * 普通曝光监测
@@ -128,8 +129,8 @@ public class ViewAbilityHandler {
      *
      * @param originUrl
      */
-    public void onExpose(String originUrl) {
-        handlerOriginURL(originUrl, MonitorType.EXPOSE, null, 0);
+    public void onExpose(String originUrl ,View view ,int type) {
+        handlerOriginURL(originUrl, MonitorType.EXPOSE, view, 0,type);
     }
 
     /**
@@ -140,7 +141,7 @@ public class ViewAbilityHandler {
      * @param adView
      */
     public void onExpose(String originUrl, View adView) {
-        handlerOriginURL(originUrl, MonitorType.EXPOSEWITHABILITY, adView, 0);
+        handlerOriginURL(originUrl, MonitorType.EXPOSEWITHABILITY, adView, 0,0);
     }
 
 
@@ -152,7 +153,7 @@ public class ViewAbilityHandler {
      * @param videoPlayType 传视频播放类型，1-自动播放，2-手动播放，0-无法识别
      */
     public void onVideoExpose(String originUrl, View videoView, int videoPlayType) {
-        handlerOriginURL(originUrl, MonitorType.VIDEOEXPOSEWITHABILITY, videoView, videoPlayType);
+        handlerOriginURL(originUrl, MonitorType.VIDEOEXPOSEWITHABILITY, videoView, videoPlayType,0);
     }
 
     /**
@@ -179,8 +180,7 @@ public class ViewAbilityHandler {
         viewAbilityService.stopViewAbilityMonitor(explorerID);
     }
 
-    private void handlerOriginURL(String originUrl, MonitorType monitorType, View adView, int videoPlayType) {
-
+    private void handlerOriginURL(String originUrl, MonitorType monitorType, View adView, int videoPlayType, int type) {
 
         //Company为空,无法监测
         Company company = getCompany(originUrl);
@@ -188,7 +188,6 @@ public class ViewAbilityHandler {
             Logger.w("监测链接:" + originUrl + " 没有对应的配置项,请检查sdkconfig.xml是否存在链接域名对应的Company配置!");
             return;
         }
-
         //[1] 截取出原监测链接u参数之后所有的内容 REDIRECTURL
         String redirectPrefix = getRedirectIdentifier(company) + company.equalizer;
         String redirectStr = "";
@@ -198,7 +197,6 @@ public class ViewAbilityHandler {
         if (matcher.find()) {
             redirectStr = matcher.group(0);
         }
-
 
         //[2] 监测链接截取掉REDIRECTURL字段之后的所有内容,重新组装为withoutRedirectURL
         String withoutRedirectURL;
@@ -248,78 +246,121 @@ public class ViewAbilityHandler {
                 impressionValue = sb.toString();
             }
 
+            //判断view是否预渲染加载
+            String view_render = abilityStats.get(ViewAbilityStats.ADVIEWABILITY_RENDER);
+
             //如果调用普通和视频可视化监测接口,需要从监测链接获取动态配置参数和可视参数过滤
             if (monitorType == MonitorType.EXPOSEWITHABILITY || monitorType == MonitorType.VIDEOEXPOSEWITHABILITY) {
 
-                //从配置中读取采集策略
-                abilityStats.setViewabilityTrackPolicy(company.sswitch.viewabilityTrackPolicy);
-                //从原始监测链接动态提取满足可视时长
-                abilityStats.setURLExposeDuration(withoutRedirectURL);
-                //从原始监测链接动态提取可视覆盖比率
-                abilityStats.setURLShowCoverRate(withoutRedirectURL);
+                if(adView != null){
+                    //从配置中读取采集策略
+                    abilityStats.setViewabilityTrackPolicy(company.sswitch.viewabilityTrackPolicy);
+                    //从原始监测链接动态提取满足可视时长
+                    abilityStats.setURLExposeDuration(withoutRedirectURL);
+                    //从原始监测链接动态提取可视覆盖比率
+                    abilityStats.setURLShowCoverRate(withoutRedirectURL);
 
-                if (monitorType == MonitorType.VIDEOEXPOSEWITHABILITY) {
-                    //标记当前为视频可视监测
-                    abilityStats.setVideoExpose(true);
-                    //记录视频播放类型
-                    abilityStats.setVideoPlayType(videoPlayType);
-                    //从原始链接动态提取视频广告时长，单位s 用于视频进度监测
-                    abilityStats.setURLVideoDuration(withoutRedirectURL);
-                    //从原始链接动态提取视频广告过程监测配置
-                    abilityStats.setURLVideoProgressTracks(withoutRedirectURL);
-                }
+                    if (monitorType == MonitorType.VIDEOEXPOSEWITHABILITY) {
+                        //标记当前为视频可视监测
+                        abilityStats.setVideoExpose(true);
+                        //记录视频播放类型
+                        abilityStats.setVideoPlayType(videoPlayType);
+                        //从原始链接动态提取视频广告时长，单位s 用于视频进度监测
+                        abilityStats.setURLVideoDuration(withoutRedirectURL);
+                        //从原始链接动态提取视频广告过程监测配置
+                        abilityStats.setURLVideoProgressTracks(withoutRedirectURL);
+                    }
 
-                //[4] 去u监测链接过滤占用字段:除了某些需要用到的参数会保留,其余在sdkconfig.xml中<viewabilityarguments>出现的关键字都会替换为空
-                String filteredURL = filterIdentifiers(company, abilityStats, withoutRedirectURL);
+                    //[4] 去u监测链接过滤占用字段:除了某些需要用到的参数会保留,其余在sdkconfig.xml中<viewabilityarguments>出现的关键字都会替换为空
+                    String filteredURL = filterIdentifiers(company, abilityStats, withoutRedirectURL);
 
-                //[5] 过滤后的URL作为可视监测补发的普通曝光,同时需要串入ImpressionID
-                exposeURL.append(filteredURL);
-                exposeURL.append(impressionValue);
+                    //[5] 过滤后的URL作为可视监测补发的普通曝光,同时需要串入ImpressionID
+                    exposeURL.append(filteredURL);
+                    exposeURL.append(impressionValue);
 
-                //[6] 通过AdviewabilityEnable确定链接是否是可视监测链接
-                // boolean isViewAbility = checkViewAbilityEnabled(viewAbilityStats, withoutRedirectURL);
+                    //[6] 通过AdviewabilityEnable确定链接是否是可视监测链接
+                    // boolean isViewAbility = checkViewAbilityEnabled(viewAbilityStats, withoutRedirectURL);
 //                if (isViewAbility) {
 //                }
-                StringBuffer viewabilityURL = new StringBuffer();
-                viewabilityURL.append(exposeURL);
+                    StringBuffer viewabilityURL = new StringBuffer();
+                    viewabilityURL.append(exposeURL);
 
-                //[7] 如果是可视化监测,普通曝光需要追加标识字段,ad:2f,mz:vx
-                String viewAbilityArgument = abilityStats.get(ViewAbilityStats.ADVIEWABILITY);
-                if (!TextUtils.isEmpty(viewAbilityArgument)) {
-                    sb = new StringBuilder();
-                    sb.append(company.separator);
-                    sb.append(viewAbilityArgument);
-                    String viewability = sb.toString();
-                    exposeURL.append(viewability);
+                    //[7] 如果是可视化监测,普通曝光需要追加标识字段,ad:2f,mz:vx
+                    String viewAbilityArgument = abilityStats.get(ViewAbilityStats.ADVIEWABILITY);
+                    if (!TextUtils.isEmpty(viewAbilityArgument)) {
+                        sb = new StringBuilder();
+                        sb.append(company.separator);
+                        sb.append(viewAbilityArgument);
+                        String viewability = sb.toString();
+                        exposeURL.append(viewability);
+                    }
+
+                    String viewAbilityArgumentResult = abilityStats.get(ViewAbilityStats.ADVIEWABILITY_RESULT);
+                    if (!TextUtils.isEmpty(viewAbilityArgumentResult) && adView != null) {
+                        sb = new StringBuilder();
+                        sb.append(company.separator);
+                        sb.append(viewAbilityArgumentResult);
+                        sb.append(company.equalizer);
+                        sb.append("0");
+                        String viewabilityResult = sb.toString();
+                        exposeURL.append(viewabilityResult);
+                    }
+                    if (adView != null && (adView instanceof View)) {
+                        //此处加上预渲染br参数添加到普通曝光中
+                        String render = company.separator + view_render + company.equalizer + "1";
+                        exposeURL.append(render);
+                        viewabilityURL.append(render);
+                        //开启线程执行ViewAbility可视化监测
+                        String explorerID = company.domain.url + adAreaID;
+                        viewAbilityService.addViewAbilityMonitor(viewabilityURL.toString(), adView, impressionID, explorerID, abilityStats);
+
+                    } else {//如果传入View为空或者非View对象,则可视化监测结果为不可见:Adviewability=0,不可测量:AdMeasurability=0
+                        Logger.w("监测链接传入的AdView为空,以正常曝光方式监测.");
+//                    String failedParams = abilityStats.getFailedViewabilityParams();//2j[],2f0,2h0
+//                    viewabilityURL.append(failedParams);
+//                    mmaSdkCallback.onEventPresent(viewabilityURL.toString());
+
+                    }
+                }else {
+                    //可视化传入的view 为NULL，不进行可视化监测
+                    String render = company.separator + view_render + company.equalizer + "0";
+                    exposeURL.append(withoutRedirectURL);
+                    exposeURL.append(render);
+//                    System.out.println("可视化传入的view 为NULL");
                 }
-
-                String viewAbilityArgumentResult = abilityStats.get(ViewAbilityStats.ADVIEWABILITY_RESULT);
-                if (!TextUtils.isEmpty(viewAbilityArgumentResult)) {
-                    sb = new StringBuilder();
-                    sb.append(company.separator);
-                    sb.append(viewAbilityArgumentResult);
-                    sb.append(company.equalizer);
-                    sb.append("0");
-                    String viewabilityResult = sb.toString();
-                    exposeURL.append(viewabilityResult);
-                }
-
-                if (adView != null && (adView instanceof View)) {
-
-                    //开启线程执行ViewAbility可视化监测
-                    String explorerID = company.domain.url + adAreaID;
-                    viewAbilityService.addViewAbilityMonitor(viewabilityURL.toString(), adView, impressionID, explorerID, abilityStats);
-
-                } else {//如果传入View为空或者非View对象,则可视化监测结果为不可见:Adviewability=0,不可测量:AdMeasurability=0
-                    Logger.w("监测链接传入的AdView为空,以正常曝光方式监测.");
-                    String failedParams = abilityStats.getFailedViewabilityParams();//2j[],2f0,2h0
-                    viewabilityURL.append(failedParams);
-                    mmaSdkCallback.onEventPresent(viewabilityURL.toString());
-                }
-
 
             } else { //如果调用普通曝光/点击接口,不需要可视化监测逻辑
+                //如果是点击，查找可见曝光池内是否有产生强交互，如果来自于强交互行为，则对应可视监测设置为达成可见，且立即上报，同时不影响点击事件上报
+                String explorerID = company.domain.url + adAreaID;
+                viewAbilityService.stopForStrongInteract(explorerID);
 
+                //普通曝光Track ADS=========================
+                if(type == 0 && (monitorType != MonitorType.CLICK) ){
+                    if(adView ==null  ){
+                        StringBuilder rendersb = new StringBuilder();
+                        rendersb.append(company.separator);
+                        rendersb.append(view_render);
+                        rendersb.append(company.equalizer);
+                        rendersb.append("0");
+                        withoutRedirectURL += rendersb.toString();
+
+                    }else {
+                        StringBuilder rendersb = new StringBuilder();
+                        rendersb.append(company.separator);
+                        rendersb.append(view_render);
+                        rendersb.append(company.equalizer);
+                        rendersb.append("1");
+                        withoutRedirectURL += rendersb.toString();
+                    }
+                }else if(type == 1 && (monitorType != MonitorType.CLICK)){
+                    StringBuilder rendersb = new StringBuilder();
+                    rendersb.append(company.separator);
+                    rendersb.append(view_render);
+                    rendersb.append(company.equalizer);
+                    rendersb.append("0");
+                    withoutRedirectURL += rendersb.toString();
+                }
+                //===================================================
                 //如果有配置ImpressionID Argument,普通曝光只需要串入impressionID,不串入
                 if (!TextUtils.isEmpty(impressionValue)) {
                     String regex = company.separator + impressionAgument + company.equalizer + "[^" + company.separator + "]*";
@@ -327,6 +368,8 @@ public class ViewAbilityHandler {
                     String filteredURL = withoutRedirectURL.replaceAll(regex, "");
                     exposeURL.append(filteredURL);
                     exposeURL.append(impressionValue);
+//                    System.out.println("ceshi:" + exposeURL.toString());
+
                 } else {
                     exposeURL.append(withoutRedirectURL);
                 }
@@ -334,6 +377,7 @@ public class ViewAbilityHandler {
 
             //[7] 普通曝光参数拼装完毕后需要重新追加上REDIRECTURL字段
             exposeURL.append(redirectStr);
+
 
 
             //[LOCALTEST] 测试计数:普通曝光事件产生计数
@@ -508,13 +552,11 @@ public class ViewAbilityHandler {
             for (String adidkey : impressions.keySet()) {
                 if (adidKey.equals(adidkey)) {
                     impressionID = impressions.get(adidkey);
-                    KLog.i("广告位:" + adidKey + " 存在对应的impressionID:" + impressionID);
                     break;
                 }
             }
         } else {//普通曝光或带可视化监测的曝光,每次触发时都生成新的ImpressionID,并存储
             impressionID = generateImpressionID(context, adAreaId);
-            KLog.i("广告位:" + adidKey + " 不存在对应的impressionID,即将生成:" + impressionID);
             impressions.put(adidKey, impressionID);
         }
 

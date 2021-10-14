@@ -119,10 +119,15 @@ Countly.sharedInstance().init(this, "sdkconfig远程地址");
 
 ###曝光监测
 
+SDK曝光监测接口现已升级为曝光/Track Ads接口， 支持曝光或Tracked Ads监测。
+
+曝光的定义：只有广告物料已经加载在客户端并至少已经开始渲染（Begin to render，简称BtR）时，才应称之为“曝光”事件。
+“渲染”指的是绘制物料的过程，或者指将物料添加到文档对象模型的过程。
+
 接口定义：
 
 ```
-public  void onExpose(String adURL)
+public  void onExpose(String adURL,View adview,int type)
 ```
 
 参数说明：
@@ -130,11 +135,14 @@ public  void onExpose(String adURL)
 | 参数    | 类型     | 说明        |
 | ----- | ------ | --------- |
 | adURL | String | 广告位曝光监测代码 |
+| adview | View | 广告展示视图对象 |
+| type | int |0 代表Tracked Ads监测； 1 代表曝光 |
+
 
 示例代码：
 
 ```
-Countly.sharedInstance().onExpose("http://example.com/axxx,bxxxx,c2,i0,h");
+Countly.sharedInstance().onExpose("http://example.com/axxx,bxxxx,c2,i0,h",adview,1);
 ```
 
 
@@ -162,6 +170,9 @@ Countly.sharedInstance().onExpose("http://example.com/axxx,bxxxx,c3,i0,h");
 
 
 ### 可见性曝光监测
+
+描述：对广告进行可见性监测时，广告必须是满足开始渲染（Begin to render，简称BtR）条件的合法曝光，否则SDK不会执行可见监测。
+在调用可见曝光监测接口时，SDK会查验传入的广告View对象是否已开始渲染，如果是，则SDK会向监测方发出曝光上报，并继续进行可见监测，直到满足可见/不可见条件，再结束可见监测流程；如果不是，则SDK会向监测方发出Tracked Ads上报，并结束可见监测流程。
 
 接口定义：
 
