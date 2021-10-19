@@ -47,6 +47,7 @@ import cn.com.mma.mobile.tracking.bean.Company;
 import cn.com.mma.mobile.tracking.bean.SDK;
 
 import static cn.com.mma.mobile.tracking.util.Reflection.checkPermission;
+import static cn.com.mma.mobile.tracking.util.Reflection.checkPermissionX;
 
 /**
  * 获得设备信息
@@ -558,8 +559,11 @@ public class DeviceInfoUtil {
             }
         }
         //参数动态获取
-        deviceInfoParams.put(Constant.TRACKING_IMEI, getImei(context));
-        deviceInfoParams.put(Constant.TRACKING_RAWIMEI, getImei(context));
+		//Android Q 之后不允许设备获取IMEI
+		if(Build.VERSION.SDK_INT < 29){
+			deviceInfoParams.put(Constant.TRACKING_IMEI, getImei(context));
+			deviceInfoParams.put(Constant.TRACKING_RAWIMEI, getImei(context));
+		}
         String apMac = getWiFiBSSID(context).replace(":", "").toUpperCase();
         deviceInfoParams.put(Constant.TRACKING_WIFIBSSID, apMac);
         deviceInfoParams.put(Constant.TRACKING_WIFISSID, getWifiSSID(context));
@@ -780,7 +784,7 @@ public class DeviceInfoUtil {
 		if (isAdidgeting) return "";
 
 		//检查SD卡adid是否存在
-		if(checkPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)){
+		if(checkPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) || checkPermissionX(context, Manifest.permission.READ_EXTERNAL_STORAGE)){
 			if(checkAdidUpdate(context)){
 				ADID = readAdid(context);
 				if(!TextUtils.isEmpty(ADID)){
@@ -792,10 +796,10 @@ public class DeviceInfoUtil {
 		ADID = SharedPreferencedUtil.getString(context);
 		if(!TextUtils.isEmpty(ADID)){
 			//判断adid是否已经存入SD卡
-			if(checkPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)){
+			if(checkPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) || checkPermissionX(context, Manifest.permission.READ_EXTERNAL_STORAGE)){
 				if(!checkAdidUpdate(context)){
 					//APP可能开始时候没有SD卡的写入权限，所以需要判断一下adid写入SD卡
-					if(checkPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)){
+					if(checkPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) || checkPermissionX(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)){
 						writeAdid(context,ADID);
 					}
 				}
@@ -820,7 +824,7 @@ public class DeviceInfoUtil {
 									//生成成功存入SP中
 									SharedPreferencedUtil.putString(context,result);
 									//adid写入SD卡中
-									if(checkPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)){
+									if(checkPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) || checkPermissionX(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)){
 										writeAdid(context,ADID);
 									}
 								}

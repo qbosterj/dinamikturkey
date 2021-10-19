@@ -142,11 +142,11 @@ public class CommonUtil {
 //		}
 //	}
 
-    public static String getSignature(String sdkVersion, long timestamp, String originURL) {
+    public static String getSignature(String sdkVersion, long timestamp, String originURL, String permissionType) {
         // 检测URL转小写
         try {
             //System.out.println("getSignature:" + sdkVersion + " timestamp:" + timestamp + "  originURL:" + originURL);
-            String signature = SignUtils.mmaSdkSign(sdkVersion, timestamp, originURL);
+            String signature = SignUtils.mmaSdkSign(sdkVersion, timestamp, originURL,permissionType);
             return signature;
         } catch (Exception e) {
         }

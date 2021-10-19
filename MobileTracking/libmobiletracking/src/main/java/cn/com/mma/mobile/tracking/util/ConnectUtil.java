@@ -163,7 +163,7 @@ public class ConnectUtil {
             }
         } catch (Exception e) {
 
-            System.out.println("upload监测链接异常:" + e.toString());
+//            System.out.println("upload监测链接异常:" + e.toString());
 
 
         } finally {

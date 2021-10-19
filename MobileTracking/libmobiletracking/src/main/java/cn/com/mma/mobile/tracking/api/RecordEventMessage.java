@@ -1,6 +1,8 @@
 package cn.com.mma.mobile.tracking.api;
 
+import android.Manifest;
 import android.content.Context;
+import android.os.Build;
 import android.text.TextUtils;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +17,7 @@ import cn.com.mma.mobile.tracking.util.CommonUtil;
 import cn.com.mma.mobile.tracking.util.DeviceInfoUtil;
 import cn.com.mma.mobile.tracking.util.LocationCollector;
 import cn.com.mma.mobile.tracking.util.Logger;
+import cn.com.mma.mobile.tracking.util.Reflection;
 import cn.com.mma.mobile.tracking.util.SdkConfigUpdateUtil;
 import cn.com.mma.mobile.tracking.util.SharedPreferencedUtil;
 
@@ -159,10 +162,20 @@ public class RecordEventMessage {
             //signature
             if (company.signature != null && company.signature.paramKey != null) {
                 //String signStr = CommonUtil.getSignature(context, builder.toString());
+                //权限检查
+                boolean permCheck = Reflection.checkPermission(context, Manifest.permission.READ_PHONE_STATE) ||
+                        Reflection.checkPermissionX(context, Manifest.permission.READ_PHONE_STATE);
+
+                boolean versionCheck = Build.VERSION.SDK_INT < 29;
                 //传入的监测代码host之后如果缺失分隔符/,会导致签名时Native处切割host时引起Crash，需要在传入的监测链接时判断或Native层修复
                 String checkURL = filteredURL.replace(host, "");
                 if (checkURL.contains("/")) {
-                    String signStr = CommonUtil.getSignature(Constant.TRACKING_SDKVS_VALUE, timestamp / 1000, builder.toString());
+                    String signStr = "";
+                    if(permCheck && versionCheck){
+                        signStr = CommonUtil.getSignature(Constant.TRACKING_SDKVS_VALUE, timestamp / 1000, builder.toString(),"1");
+                    }else {
+                        signStr = CommonUtil.getSignature(Constant.TRACKING_SDKVS_VALUE, timestamp / 1000, builder.toString(),null);
+                    }
                     builder.append(separator);
                     builder.append(company.signature.paramKey);
                     builder.append(equalizer);
