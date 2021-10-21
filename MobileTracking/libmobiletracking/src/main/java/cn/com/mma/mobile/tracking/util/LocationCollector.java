@@ -104,8 +104,10 @@ public class LocationCollector {
     public void syncLocation() {
         try {
 
+            boolean locationCheck = Reflection.checkPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) || Reflection.checkPermissionX(mContext, Manifest.permission.ACCESS_FINE_LOCATION);
+            boolean coraseCheck = Reflection.checkPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) || Reflection.checkPermissionX(mContext, Manifest.permission.ACCESS_COARSE_LOCATION);
             //require ACCESS_FINE_LOCATION and ACCESS_FINE_LOCATION
-            if (Reflection.checkPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) && Reflection.checkPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION)) {
+            if (locationCheck && coraseCheck) {
                 //long start = System.currentTimeMillis();
                 //获取所有可用的位置提供器
                 List<String> providers = locationManager.getProviders(true);

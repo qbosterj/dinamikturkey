@@ -1,16 +1,14 @@
-#Android SDK 部署指南
+#数字广告监测及验证统一SDK (Android) 部署指南
 
 
 
 ##适用范围
 
-MMA Android SDK适用于 **Android 2.3.3（API Level 10）**及以上的设备。
-
-
+Android SDK适用于 **Android 2.3.3（API Level 10）**及以上的设备。
 
 ## 集成SDK
 
-### 导入SDK
+### 步骤1: 导入SDK
 
 请根据所用IDE选择导入方式：
 
@@ -27,24 +25,24 @@ MMA Android SDK适用于 **Android 2.3.3（API Level 10）**及以上的设备�
 ```
 dependencies {
       …
-      compile files('libs/mmachina_sdk.jar') 
+      implementation files('libs/mmachina_sdk.jar') 
       …
   }
 ```
 
-###导入签名库
+####导入签名库
 
 将SDK中的 `libMMASignature.so`  文件拷贝到工程 `libs/armeabi` 目录下， SDK `lib_abi` 目录下对应不同CPU架构下的库文件，建议拷贝该目录下所有到工程 **app/libs **文件夹下，如果考虑APK大小，至少要包含主流架构：`armeabi`、`armeabi-v7a`、`arm64-v8a`。
 
-### 导入离线配置
+#### 导入离线配置
 
 将 `sdkconfig.xml` 配置文件拷贝到工程的 `assets` 目录下，在网络不好或者离线状态下读取缺省配置可以正常监测。同时 **配置文件** 上传到  web 服务器，使其可以通过 web 方式访问，便于后期灵活远程变更配置。
 
 
 
-### 配置权限
+#### 配置权限
 
-#### 常规权限
+##### 常规权限
 
 满足基本监测需要如下权限：
 
@@ -55,7 +53,7 @@ dependencies {
 | READ_PHONE_STATE     | 允许访问手机设备的信息，通过获取的信息来唯一标识用户。        |
 | ACCESS_WIFI_STATE    | 允许读取WiFi相关信息，在合适的网络环境下更新配置。        |
 
-#### 扩展权限
+##### 扩展权限
 
 在基本监测的基础上，如果想要回传**位置相关信息**，除了监测代码对应**sdkconfig**内**Company**标签的<isTrackLocation>项设置为**true**，还额外需要如下权限：
 
@@ -86,15 +84,17 @@ dependencies {
 </manifest>
 ```
 
-### 引入类
+### 步骤2:使用方法
 
-在您需要使用 MMASDK 监测功能的类中，**import** 相关类：
+#### 引入类
+
+在您需要使用 SDK 监测功能的类中，**import** 相关类：
 
 ```
 import cn.com.mma.mobile.tracking.api.Countly;
 ```
 
-### SDK初始化
+#### SDK初始化
 
 接口定义：
 
@@ -117,7 +117,7 @@ Countly.sharedInstance().init(this, "sdkconfig远程地址");
 
 
 
-###曝光监测
+####曝光监测
 
 SDK曝光监测接口现已升级为曝光/Track Ads接口， 支持曝光或Tracked Ads监测。
 
@@ -147,7 +147,7 @@ Countly.sharedInstance().onExpose("http://example.com/axxx,bxxxx,c2,i0,h",adview
 
 
 
-### 点击监测
+#### 点击监测
 
 接口定义：
 
@@ -164,12 +164,12 @@ public  void onClick(String adURL)
 示例代码：
 
 ```
-Countly.sharedInstance().onExpose("http://example.com/axxx,bxxxx,c3,i0,h");
+Countly.sharedInstance().onClick("http://example.com/axxx,bxxxx,c3,i0,h");
 ```
 
 
 
-### 可见性曝光监测
+#### 可见性曝光监测
 
 描述：对广告进行可见性监测时，广告必须是满足开始渲染（Begin to render，简称BtR）条件的合法曝光，否则SDK不会执行可见监测。
 在调用可见曝光监测接口时，SDK会查验传入的广告View对象是否已开始渲染，如果是，则SDK会向监测方发出曝光上报，并继续进行可见监测，直到满足可见/不可见条件，再结束可见监测流程；如果不是，则SDK会向监测方发出Tracked Ads上报，并结束可见监测流程。
@@ -197,7 +197,7 @@ Countly.sharedInstance().onExpose("http://vxyz.admaster.com.cn/w/a86218,b1778712
 
 
 
-### 可见性视频曝光监测
+#### 可见性视频曝光监测
 
 接口定义：
 
@@ -224,7 +224,7 @@ public void onVideoExpose(String adURL, View videoView, int videoPlayType)
 
 
 
-### 停止可见性监测
+#### 停止可见性监测
 
 接口定义：
 
@@ -255,7 +255,7 @@ SDK提供主动关闭可见性监测的功能，需要传入**已经开启可见
 
 
 
-### 可见性曝光JS监测
+#### 可见性曝光JS监测
 
 接口定义：
 
@@ -283,7 +283,7 @@ Countly.sharedInstance().onJSVideoExpose(adURL, adView);
 
 
 
-### 调试模式
+#### 调试模式
 
 调试模式下，SDK会有LOG输出，APP发布时建议不要开启。（请在**初始化之前设置Log开关**，默认为false）。
 
@@ -305,7 +305,7 @@ public void setLogState(boolean debugmode)
 Countly.sharedInstance().setLogState(true);
 ```
 
-### 释放内存
+#### 释放内存
 
 SDK提供释放内存的接口，一般在应用即将退出时调用，或者等待系统内存管理自动释放。
 
@@ -321,7 +321,7 @@ public  void terminateSDK()
 Countly.sharedInstance().terminateSDK();
 ```
 
-### 混淆配置
+#### 混淆配置
 
 如果开发者的应用需要混淆，请在 `Proguard` 混淆配置文件中增加以下规则，以避免 SDK 不可用。
 
@@ -333,7 +333,7 @@ Countly.sharedInstance().terminateSDK();
 
 
 
-## 验证和调试
+### 步骤3:验证和调试
 
 SDK 的测试有两个方面：
 

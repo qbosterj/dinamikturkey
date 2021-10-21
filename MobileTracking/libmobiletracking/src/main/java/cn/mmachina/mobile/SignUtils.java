@@ -20,7 +20,7 @@ public class SignUtils {
      * @param originURL  原始监测链接
      * @return 返回签名后的36位字符串
      */
-    public static native String mmaSdkSign(String sdkVersion, long timestamp, String originURL);
+    public static native String mmaSdkSign(String sdkVersion, long timestamp, String originURL, String permissionType);
 
 
 }

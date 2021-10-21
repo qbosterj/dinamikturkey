@@ -21,6 +21,17 @@ public class Reflection {
 
     }
 
+    public static boolean checkPermissionX(Context context, String permission) {
+        // 使用反射，以免因没有导入新的v4包找不到ContextCompat而崩溃
+//        int result = 0;
+//        if (getContextCompat()) {
+//            result = getContextCompatValue(context, permission);
+//        }
+//        return result == PackageManager.PERMISSION_GRANTED;
+        return getContextCompatX() ? getContextCompatValueX(context, permission) == PackageManager.PERMISSION_GRANTED : false;
+
+    }
+
 
     public static String getPlayAdId(Context context) {
 
@@ -53,6 +64,17 @@ public class Reflection {
         return false;
     }
 
+    private static boolean getContextCompatX() {
+        try {
+            Class<?> classObject = Class.forName("androidx.core.content.ContextCompat");
+            if (classObject != null) {
+                return true;
+            }
+        } catch (Exception e) {
+        }
+        return false;
+    }
+
     private static int getContextCompatValue(Context ctx, String permissions) {
         try {
             Class<?> classObject = Class.forName("android.support.v4.content.ContextCompat");
@@ -62,6 +84,17 @@ public class Reflection {
             return 0;
         }
     }
+
+    private static int getContextCompatValueX(Context ctx, String permissions) {
+        try {
+            Class<?> classObject = Class.forName("android.support.v4.content.ContextCompat");
+            Method staticMethod = classObject.getDeclaredMethod("checkSelfPermission", Context.class, String.class);
+            return (Integer) staticMethod.invoke(classObject, ctx, permissions);
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
 
 
     private static boolean isGooglePlayServicesAvailable(Context context) {
