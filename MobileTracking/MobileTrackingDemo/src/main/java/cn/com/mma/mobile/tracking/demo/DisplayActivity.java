@@ -27,7 +27,7 @@ public class DisplayActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         adView = (TextView) findViewById(R.id.adview);
-        
+
         //动画
 //        Animation anim = new AnimationUtils().loadAnimation(this, R.anim.anim_scale);
 //        anim.setFillAfter(true);//动画执行完毕后停留在最后一帧
