@@ -126,7 +126,8 @@ public class RecordEventMessage {
                     builder.append("");
                 } else if (argumentKey.equals(Constant.REDIRECTURL)) {
                     //将标识重定向的地址截取出来:链接argumentValue之后所有的内容
-                    String regex = separator + argumentValue + ".*";
+                    //优化监测链接里面可能出现重定向字符导致参数重复拼接的问题
+                    String regex = separator + argumentValue + company.equalizer +".*";
                     Pattern pattern = Pattern.compile(regex);
                     Matcher matcher = pattern.matcher(originURL);
                     if (matcher.find()) redirectUrlValue = matcher.group(0);
@@ -188,6 +189,7 @@ public class RecordEventMessage {
 
             //redirectURL
             builder.append(redirectUrlValue);
+
 
         } catch (Exception e) {
             Logger.e(e.getMessage());

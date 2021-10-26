@@ -56,7 +56,7 @@ public class AbilityWorker implements AbilityCallback {
 
         activeWorkflow();
 
-        loadAndUploadCachedWorks();
+//        loadAndUploadCachedWorks();
 
     }
 
@@ -185,7 +185,7 @@ public class AbilityWorker implements AbilityCallback {
     @Override
     public void onFinished(String taskID) {
         //T每次成功上报数据后,都删除CACHE内impressionID对应的Data
-        mCacheManager.removeObject(taskID);
+//        mCacheManager.removeObject(taskID);
     }
 
 
@@ -247,10 +247,10 @@ public class AbilityWorker implements AbilityCallback {
          */
         private void cacheWorks() {
             try {
-                for (String explorerID : explorers.keySet()) {
-                    ViewAbilityExplorer explorer = explorers.get(explorerID);
-                    mCacheManager.setObject(explorerID, explorer);
-                }
+//                for (String explorerID : explorers.keySet()) {
+//                    ViewAbilityExplorer explorer = explorers.get(explorerID);
+//                    mCacheManager.setObject(explorerID, explorer);
+//                }
                 cacheIndex = 0;
             } catch (Exception e) {
                 e.printStackTrace();
