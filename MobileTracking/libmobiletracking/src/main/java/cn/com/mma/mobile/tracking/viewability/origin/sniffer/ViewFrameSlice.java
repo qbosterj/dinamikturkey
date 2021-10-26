@@ -475,6 +475,7 @@ public class ViewFrameSlice implements Serializable {
         return currentVisible && checkVisibled(contentView);
     }
 
+
     /**
      * 判断当前view是否是透明或隐藏
      *
@@ -485,18 +486,50 @@ public class ViewFrameSlice implements Serializable {
         try {
             // visible&hidden
             if (!(contentView.getVisibility() == View.VISIBLE)) {
+//                int id = contentView.getBackground().getAlpha();
                 return false;
+            }
+            //判断view是否包含子view
+            if (contentView instanceof ViewGroup){
+                ViewGroup viewGroup = (ViewGroup)contentView;
+                //未设置背景色
+                if(viewGroup.getBackground() == null || viewGroup.getChildCount() < 1){
+                    return false;
+                }
             }
             // transparent
             if (contentView.getAlpha() <= 0.1f) {// require min api 11
                 return false;
             }
+
         } catch (Throwable e) {
             e.printStackTrace();
         }
-
         return true;
     }
+
+//    /**
+//     * 判断当前view是否是透明或隐藏
+//     *
+//     * @param contentView
+//     * @return
+//     */
+//    private boolean checkVisibled(View contentView) {
+//        try {
+//            // visible&hidden
+//            if (!(contentView.getVisibility() == View.VISIBLE)) {
+//                return false;
+//            }
+//            // transparent
+//            if (contentView.getAlpha() <= 0.1f) {// require min api 11
+//                return false;
+//            }
+//        } catch (Throwable e) {
+//            e.printStackTrace();
+//        }
+//
+//        return true;
+//    }
 
 
 
