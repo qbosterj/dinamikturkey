@@ -469,11 +469,16 @@ public class DeviceInfoUtil {
             if (wm != null) {
                 WifiInfo wifiInfo = wm.getConnectionInfo();
                 if (wifiInfo != null) {
-                    return wifiInfo.getMacAddress();
+                	if(wifiInfo.getMacAddress() != null){
+						return wifiInfo.getMacAddress();
+					}else {
+                		return "";
+					}
                 }
             }
         } catch (Throwable e) {
             e.printStackTrace();
+            return "";
         }
         return "";
     }
