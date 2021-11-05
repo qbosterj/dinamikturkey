@@ -507,7 +507,6 @@ public class ViewFrameSlice implements Serializable {
         }
         return true;
     }
-
 //    private boolean checkVisibled(View contentView) {
 //        try {
 //            // visible&hidden

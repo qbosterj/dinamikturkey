@@ -869,22 +869,6 @@
                         <isRequired>true</isRequired>
                     </argument>
 
-                      <!-- 新增OAID值 -->
-                    <argument>
-                        <key>OAID</key>
-                        <value>oa</value>
-                        <urlEncode>true</urlEncode>
-                        <isRequired>true</isRequired>
-                    </argument>
-
-                    <!--新增ADID值 -->
-                    <argument>
-                        <key>ADID</key>
-                        <value>adid</value>
-                        <urlEncode>true</urlEncode>
-                        <isRequired>true</isRequired>
-                    </argument>
-
                     <argument>
                         <key>OAID</key>
                         <value>oa</value>
@@ -1024,20 +1008,6 @@
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
-                     <!-- 判断广告视图view是否有CBR -->
-                    <argument>
-                        <key>ImpressionType</key>
-                        <value>vitype</value>
-                        <urlEncode>true</urlEncode>
-                        <isRequired>true</isRequired>
-                    </argument>
-                    <!-- 可视轨迹数据是否上报 -->
-                    <argument>
-                        <key>AdviewabilityRecord</key>
-                        <value>varecord</value>
-                        <urlEncode>true</urlEncode>
-                        <isRequired>true</isRequired>
-                    </argument>
                     <!-- 采集属性 start -->
                     <!-- 判断广告视图view是否有CBR -->
                     <argument>
@@ -1109,13 +1079,6 @@
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
-                    <!-- APP是否在前台运行 -->
-                    <argument>
-                        <key>AdviewabilityForground</key>
-                        <value>vfg</value>
-                        <urlEncode>true</urlEncode>
-                        <isRequired>true</isRequired>
-                    </argument>
                     <!-- 屏幕是否点亮 -->
                     <argument>
                         <key>AdviewabilityLight</key>
@@ -1123,24 +1086,27 @@
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
-                    
                     <!-- APP是否在前台运行 -->
                     <argument>
                         <key>AdviewabilityForground</key>
-                        <value>vafg</value>
+                        <value>vfg</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
-                    <!-- 广告素材可见性 -->
+                    <!-- 可视视图可见性 -->
                     <argument>
-                        <key>AdviewabilityResult</key>
-                        <value>varesult</value>
+                        <key>Adviewability</key>
+                        <value>vab</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
-<<<<<<< HEAD
-                    <!-- 满足可视条件时的覆盖率 -->
-=======
+                    <!-- 可视视图可测量性 -->
+                    <argument>
+                        <key>AdMeasurability</key>
+                        <value>vm</value>
+                        <urlEncode>true</urlEncode>
+                        <isRequired>true</isRequired>
+                    </argument>
                     <!-- 广告素材可见性 -->
                     <argument>
                         <key>AdviewabilityResult</key>
@@ -1152,53 +1118,44 @@
 
                     <!-- 配置属性 start -->
                     <!-- 满足可视覆盖率 -->
->>>>>>> ba27c684d0faa3b989c2ff30dde4e21ffcdceaf5
                     <argument>
                         <key>AdviewabilityConfigArea</key>
-                        <value>vaconfarea</value>
+                        <value>vca</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
-                    <!-- 满足可视条件时的时长 -->
+                    <!-- 满足可视时长 -->
                     <argument>
                         <key>AdviewabilityConfigThreshold</key>
-                        <value>vaconfth</value>
+                        <value>vct</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
-                    <!-- 视频广告素材的总播放时长 -->
+                    <!-- 可视视频播放时长 -->
                     <argument>
                         <key>AdviewabilityVideoDuration</key>
-                        <value>vavd</value>
+                        <value>vcvd</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
-                    <!-- 视频广告素材播放进度监测事件 -->
+                    <!-- 可视视频播放进度监测事件类型 -->
                     <argument>
                         <key>AdviewabilityVideoProgress</key>
-                        <value>vavp</value>
+                        <value>vcvp</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
-                    <!-- 视频广告素材的播放类型 -->
+                    <!-- 可视监测传入的视频播放类型 -->
                     <argument>
                         <key>AdviewabilityVideoPlayType</key>
-                        <value>vavpt</value>
+                        <value>vcpt</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
-                    <!-- 视频广告素材播放进度配置依次为:25%50%75%100% -->
+                    <!-- 视频可视化播放进度配置依次为:25%50%75%100% -->
                     <argument>
                         <key>AdviewabilityVideoProgressPoint</key>
-                        <value>vavpp</value>
-                        <urlEncode>true</urlEncode>
-                        <isRequired>true</isRequired>
-                    </argument>
-
-                    <!-- Strong interaction exposure -->
-                    <argument>
-                        <key>AdviewabilityStrongInteract</key>
-                        <value>vasi</value>
+                        <value>vcpp</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
@@ -1217,7 +1174,6 @@
             <!--如果设置true   timeStamper使用秒-->
             <timeStampUseSecond>true</timeStampUseSecond>
         </company>
-
 
         <company>
             <name>adbug</name>
@@ -1468,8 +1424,7 @@
             <!--如果设置true   timeStamper使用秒-->
             <timeStampUseSecond>true</timeStampUseSecond>
         </company>
-
-
+        
         <company>
             <name>rtbasia</name>
             <!-- Viewability Js方式监测 Js在线更新地址 e.g. http://xxxx.com.cn/docs/mma-sdk.js -->
