@@ -111,6 +111,11 @@ public class LocationCollector {
                 //long start = System.currentTimeMillis();
                 //获取所有可用的位置提供器
                 List<String> providers = locationManager.getProviders(true);
+                //判断位置提供器是否为空
+                if(providers == null){
+                    Logger.w("no available Location Provider!");
+                    return;
+                }
                 String locationProvider = null;
                 Location location = null;
 

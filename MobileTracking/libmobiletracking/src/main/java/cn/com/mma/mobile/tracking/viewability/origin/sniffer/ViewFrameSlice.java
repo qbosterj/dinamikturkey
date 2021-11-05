@@ -508,12 +508,6 @@ public class ViewFrameSlice implements Serializable {
         return true;
     }
 
-    /**
-     * 判断当前view是否是透明或隐藏
-     *
-     * @param contentView
-     * @return
-     */
 //    private boolean checkVisibled(View contentView) {
 //        try {
 //            // visible&hidden

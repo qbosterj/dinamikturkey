@@ -261,7 +261,7 @@ public class Countly {
     public void onVideoExpose(String adURL, View videoView, int videoPlayType) {
 
 
-        triggerEvent(EVENT_VIEWABILITY_VIDEOEXPOSE, adURL, videoView, videoPlayType);
+        triggerVideoEvent(EVENT_VIEWABILITY_VIDEOEXPOSE, adURL, videoView, videoPlayType);
     }
 
     /**
@@ -329,6 +329,11 @@ public class Countly {
 
     private  void triggerEvent(String eventName, String adURL, View adView,int type) {
         triggerEvent(eventName, adURL, adView, 0, type);
+
+    }
+
+    private  void triggerVideoEvent(String eventName, String adURL, View adView,int videoPlaytype) {
+        triggerEvent(eventName, adURL, adView, videoPlaytype, 0);
     }
 
 
