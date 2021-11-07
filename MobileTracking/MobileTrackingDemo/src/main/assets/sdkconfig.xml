@@ -787,7 +787,7 @@
             <!--<separator>&amp;</separator>-->
             <!--ADID服务端地址-->
             <adidurl>https://g.cn.miaozhen.com/x/k=adid</adidurl>
-            
+
 
             <equalizer>=</equalizer>
 
@@ -1424,7 +1424,7 @@
             <!--如果设置true   timeStamper使用秒-->
             <timeStampUseSecond>true</timeStampUseSecond>
         </company>
-        
+
         <company>
             <name>rtbasia</name>
             <!-- Viewability Js方式监测 Js在线更新地址 e.g. http://xxxx.com.cn/docs/mma-sdk.js -->
