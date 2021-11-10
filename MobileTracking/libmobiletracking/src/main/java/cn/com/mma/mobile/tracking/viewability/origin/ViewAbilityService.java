@@ -4,6 +4,8 @@ import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 import java.lang.ref.WeakReference;
+
+import cn.com.mma.mobile.tracking.api.ViewAbilityHandler;
 import cn.com.mma.mobile.tracking.util.Logger;
 import cn.com.mma.mobile.tracking.util.klog.KLog;
 import cn.com.mma.mobile.tracking.viewability.origin.sniffer.AbilityEngine;
@@ -23,6 +25,8 @@ public class ViewAbilityService {
     public static final String BUNDLE_IMPRESSIONID = "impressionId";
     public static final String BUNDLE_EXPLORERID = "explorerID";
     public static final String BUNDLE_VBRESULT = "vbresult";
+    public static final String BUNDLE_CALLBACK = "callback";
+    public static final String BUNDLE_MONTYPE = "moitortype";
 
     //内部流程输出开关 release模式设置为FALSE
     public static boolean LOCAL_DEBUG = true;
@@ -52,7 +56,7 @@ public class ViewAbilityService {
         presenter = new AbilityEngine(context, viewAbilityEventListener, viewAbilityConfig);
     }
 
-    public void addViewAbilityMonitor(String adURL, View view, String impressionID, String explorerID, ViewAbilityStats result) {
+    public void addViewAbilityMonitor(String adURL, View view, String impressionID, String explorerID, ViewAbilityStats result, CallBack callBack, ViewAbilityHandler.MonitorType monitorType) {
         WeakReference<View> weakReference = new WeakReference<>(view);
         View adView = weakReference.get();
         if (adView != null) {
@@ -61,6 +65,9 @@ public class ViewAbilityService {
             bundle.putString(BUNDLE_IMPRESSIONID, impressionID);
             bundle.putString(BUNDLE_EXPLORERID, explorerID);
             bundle.putSerializable(BUNDLE_VBRESULT, result);
+            bundle.putSerializable(BUNDLE_CALLBACK, callBack);
+            bundle.putSerializable(BUNDLE_MONTYPE, monitorType);
+
             presenter.addViewAbilityMonitor(bundle, adView);
             //Logger.d("URL:" + adURL + " 开启View Ability 监测->");
         }
@@ -70,7 +77,16 @@ public class ViewAbilityService {
         presenter.stopViewAbilityMonitor(explorerID);
     }
 
-    public void stopForStrongInteract(String explorerID) {
-        presenter.stopForStrongInteract(explorerID);
+    public void stopForStrongInteract(String explorerID, CallBack callBack, ViewAbilityHandler.MonitorType monitorType) {
+        if(callBack != null){
+            Bundle bundle = new Bundle();
+            bundle.putSerializable(BUNDLE_CALLBACK,callBack);
+            bundle.putSerializable(BUNDLE_MONTYPE,monitorType);
+            presenter.stopForStrongInteract(explorerID,bundle);
+        }else {
+            presenter.stopForStrongInteract(explorerID,null);
+        }
+
+
     }
 }

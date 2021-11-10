@@ -41,6 +41,7 @@ public class XmlUtil {
         //使用局部变量控制该标签的遍历起止,以便在END_TAG时区分
         boolean isAdplacements = false;
         boolean isviewabilityarguments = false;
+        boolean issensorarguments = false;
 
 		try {
 			XmlPullParser parser = Xml.newPullParser();
@@ -183,11 +184,19 @@ public class XmlUtil {
                                 isviewabilityarguments = true;
                             }
 
+                            //新增IVT相关参数
+                            if (elementName.equals("sensorarguments")) {
+                                company.config.sensorarguments = new HashMap<>();
+                                issensorarguments = true;
+                            }
+
                         }
                         if ("separator".equals(elementName))
 							company.separator = parser.nextText();
                         if ("adidurl".equals(elementName))
                             company.adidurl = parser.nextText();
+                        if ("antidevice".equals(elementName))
+                            company.antidevice = parser.nextText();
 						if ("equalizer".equals(elementName))
 							company.equalizer = parser.nextText();
 						if ("timeStampUseSecond".equals(elementName))
@@ -209,6 +218,8 @@ public class XmlUtil {
                             company.config.adplacements.put(argument.key, argument);
                         } else if (isviewabilityarguments) {//如果是viewabilityarguments标签的元素
                             company.config.viewabilityarguments.put(argument.key, argument);
+                        } else if (issensorarguments) {//如果是反作弊的sensorarguments标签的元素
+                            company.config.sensorarguments.put(argument.key, argument);
                         } else {//其余都放入arguments list
                             company.config.arguments.add(argument);
                         }
@@ -220,6 +231,10 @@ public class XmlUtil {
                     }
                     if (endElement.equals("viewabilityarguments")) {
                         isviewabilityarguments = false;
+                        argument = null;
+                    }
+                    if (endElement.equals("sensorarguments")) {
+                        issensorarguments = false;
                         argument = null;
                     }
                     if ("event".equals(endElement)) {

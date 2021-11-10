@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.text.TextUtils;
 import android.view.View;
+
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -16,6 +18,7 @@ import cn.com.mma.mobile.tracking.util.DeviceInfoUtil;
 import cn.com.mma.mobile.tracking.util.Logger;
 import cn.com.mma.mobile.tracking.util.SdkConfigUpdateUtil;
 import cn.com.mma.mobile.tracking.util.klog.KLog;
+import cn.com.mma.mobile.tracking.viewability.origin.CallBack;
 import cn.com.mma.mobile.tracking.viewability.origin.ViewAbilityEventListener;
 import cn.com.mma.mobile.tracking.viewability.origin.ViewAbilityService;
 import cn.com.mma.mobile.tracking.viewability.origin.ViewAbilityStats;
@@ -29,11 +32,14 @@ import cn.com.mma.mobile.tracking.viewability.webjs.ViewAbilityJsService;
  */
 public class ViewAbilityHandler {
 
-    enum MonitorType {
+    public enum MonitorType {
         CLICK,
-        EXPOSE,
+        IMPRESSION,
         EXPOSEWITHABILITY,
-        VIDEOEXPOSEWITHABILITY
+        VIDEOEXPOSEWITHABILITY,
+        VIEWABLE,
+        NONVIEWABLE,
+        UNMEASURED
     }
 
     private Context context;
@@ -117,8 +123,8 @@ public class ViewAbilityHandler {
      *
      * @param originUrl
      */
-    public void onClick(String originUrl) {
-        handlerOriginURL(originUrl, MonitorType.CLICK, null, 0,0);
+    public void onClick(String originUrl,CallBack callBack) {
+        handlerOriginURL(originUrl, MonitorType.CLICK, null, 0,0,callBack);
     }
 
 
@@ -129,8 +135,8 @@ public class ViewAbilityHandler {
      *
      * @param originUrl
      */
-    public void onExpose(String originUrl ,View view ,int type) {
-        handlerOriginURL(originUrl, MonitorType.EXPOSE, view, 0,type);
+    public void onExpose(String originUrl ,View view ,int type,CallBack callBack) {
+        handlerOriginURL(originUrl, MonitorType.IMPRESSION, view, 0,type,callBack);
     }
 
     /**
@@ -140,8 +146,8 @@ public class ViewAbilityHandler {
      * @param originUrl
      * @param adView
      */
-    public void onExpose(String originUrl, View adView) {
-        handlerOriginURL(originUrl, MonitorType.EXPOSEWITHABILITY, adView, 0,0);
+    public void onExpose(String originUrl, View adView,CallBack callBack) {
+        handlerOriginURL(originUrl, MonitorType.EXPOSEWITHABILITY, adView, 0,0,callBack);
     }
 
 
@@ -152,8 +158,8 @@ public class ViewAbilityHandler {
      * @param videoView
      * @param videoPlayType 传视频播放类型，1-自动播放，2-手动播放，0-无法识别
      */
-    public void onVideoExpose(String originUrl, View videoView, int videoPlayType) {
-        handlerOriginURL(originUrl, MonitorType.VIDEOEXPOSEWITHABILITY, videoView, videoPlayType,0);
+    public void onVideoExpose(String originUrl, View videoView, int videoPlayType,CallBack callBack) {
+        handlerOriginURL(originUrl, MonitorType.VIDEOEXPOSEWITHABILITY, videoView, videoPlayType,0,callBack);
     }
 
     /**
@@ -180,7 +186,7 @@ public class ViewAbilityHandler {
         viewAbilityService.stopViewAbilityMonitor(explorerID);
     }
 
-    private void handlerOriginURL(String originUrl, MonitorType monitorType, View adView, int videoPlayType, int type) {
+    private void handlerOriginURL(String originUrl, MonitorType monitorType, View adView, int videoPlayType, int type, CallBack callBack) {
 
         //Company为空,无法监测
         Company company = getCompany(originUrl);
@@ -312,7 +318,7 @@ public class ViewAbilityHandler {
                         viewabilityURL.append(render);
                         //开启线程执行ViewAbility可视化监测
                         String explorerID = company.domain.url + adAreaID;
-                        viewAbilityService.addViewAbilityMonitor(viewabilityURL.toString(), adView, impressionID, explorerID, abilityStats);
+                        viewAbilityService.addViewAbilityMonitor(viewabilityURL.toString(), adView, impressionID, explorerID, abilityStats,callBack,monitorType);
 
                     } else {//如果传入View为空或者非View对象,则可视化监测结果为不可见:Adviewability=0,不可测量:AdMeasurability=0
                         Logger.w("监测链接传入的AdView为空,以正常曝光方式监测.");
@@ -332,7 +338,7 @@ public class ViewAbilityHandler {
             } else { //如果调用普通曝光/点击接口,不需要可视化监测逻辑
                 //如果是点击，查找可见曝光池内是否有产生强交互，如果来自于强交互行为，则对应可视监测设置为达成可见，且立即上报，同时不影响点击事件上报
                 String explorerID = company.domain.url + adAreaID;
-                viewAbilityService.stopForStrongInteract(explorerID);
+                viewAbilityService.stopForStrongInteract(explorerID,callBack,monitorType);
 
                 //普通曝光Track ADS=========================
                 if(type == 0 && (monitorType != MonitorType.CLICK) ){
@@ -405,7 +411,7 @@ public class ViewAbilityHandler {
 
 
         //[8] 最终将REDIRECTURL重新拼装到URL末尾,并回调原有Countly线程单独发送监测事件
-        mmaSdkCallback.onEventPresent(exposeURL.toString());
+        mmaSdkCallback.onEventPresent(exposeURL.toString(),callBack,monitorType);
 
     }
 

@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import cn.com.mma.mobile.tracking.api.Countly;
+import cn.com.mma.mobile.tracking.viewability.origin.CallBack;
 
 
 /**
@@ -45,7 +46,17 @@ public class MainActivity extends AppCompatActivity {
      * @param view
      */
     public void doClick(View view) {
-        Countly.sharedInstance().onClick(TRACKING_URL);
+        Countly.sharedInstance().onClick(TRACKING_URL, new CallBack() {
+            @Override
+            public void onSuccess(String exposeUrl) {
+
+            }
+
+            @Override
+            public void onFailed(String errorMessage) {
+
+            }
+        });
         Log.d(TAG, "[click]：" + TRACKING_URL);
     }
 
@@ -55,7 +66,17 @@ public class MainActivity extends AppCompatActivity {
      * @param view
      */
     public void doExpose(View view) {
-        Countly.sharedInstance().onExpose(TRACKING_URL,null,1);
+        Countly.sharedInstance().onExpose(TRACKING_URL, null, 1, new CallBack() {
+            @Override
+            public void onSuccess(String exposeUrl) {
+
+            }
+
+            @Override
+            public void onFailed(String errorMessage) {
+
+            }
+        });
         Log.d(TAG, "[expose]：" + TRACKING_URL);
     }
 
@@ -65,7 +86,17 @@ public class MainActivity extends AppCompatActivity {
      * @param view
      */
     public void doViewAbilityExpose(View view) {
-        Countly.sharedInstance().onExpose(TRACKING_URL, adView);
+        Countly.sharedInstance().onExpose(TRACKING_URL, adView, new CallBack() {
+            @Override
+            public void onSuccess(String exposeUrl) {
+
+            }
+
+            @Override
+            public void onFailed(String errorMessage) {
+
+            }
+        });
 //        Countly.sharedInstance().onVideoExpose(TRACKING_URL,adView,1);
         Log.d(TAG, "[ViewAbilityExpose]：" + TRACKING_URL);
 //        new Handler().postDelayed(new Runnable(){

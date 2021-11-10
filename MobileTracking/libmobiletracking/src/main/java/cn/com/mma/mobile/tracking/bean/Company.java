@@ -18,5 +18,7 @@ public class Company {
 	public boolean timeStampUseSecond;
     public Applist applist;
     public String adidurl;
+	public String antidevice;
+
 
 }

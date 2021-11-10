@@ -156,8 +156,10 @@ public class ConnectUtil {
                 //redirect
                 String redirectURL = httpConnection.getHeaderField("Location");
                 if (!TextUtils.isEmpty(redirectURL)) {
+                    //SDK访问o后面的落地页，并不能真正的打开具体页面，跳转的具体动作媒体自己完成
                     httpConnection = (HttpURLConnection) new URL(redirectURL).openConnection();
                     statusCode = httpConnection.getResponseCode();
+
                     //Logger.d("redirect statusCode::" + statusCode);
                 }
             }
@@ -326,7 +328,6 @@ public class ConnectUtil {
 
             int code =urlConn.getResponseCode();
 
-            Log.d("lincoln","请求code"+code);
             //获取所有Header
             Map<String, List<String>> map = urlConn.getHeaderFields();
             List<String> cookies = map.get("Set-Cookie");

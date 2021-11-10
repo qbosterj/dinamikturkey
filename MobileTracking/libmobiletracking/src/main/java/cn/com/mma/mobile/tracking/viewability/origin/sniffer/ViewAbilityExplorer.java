@@ -13,7 +13,9 @@ import java.util.HashMap;
 import java.util.List;
 
 import cn.com.mma.mobile.tracking.api.Countly;
+import cn.com.mma.mobile.tracking.api.ViewAbilityHandler;
 import cn.com.mma.mobile.tracking.util.klog.KLog;
+import cn.com.mma.mobile.tracking.viewability.origin.CallBack;
 import cn.com.mma.mobile.tracking.viewability.origin.ViewAbilityStats;
 
 
@@ -34,6 +36,9 @@ public class ViewAbilityExplorer implements Serializable {
     private transient View adView;
     /*标识监测链接的唯一ID*/
     private String impressionID;
+    /*接口回调对象*/
+    private CallBack exposeCallBack;
+    private ViewAbilityHandler.MonitorType monitorType;
     /*Ability状态 */
     private AbilityStatus abilityStatus;
     /*曝光可视周期内时间轴块*/
@@ -71,7 +76,7 @@ public class ViewAbilityExplorer implements Serializable {
     private boolean isStrongInteract = false;
 
 
-    public ViewAbilityExplorer(String explorerID, String adURL, View adView, String impressionID, ViewAbilityConfig config, ViewAbilityStats result) {
+    public ViewAbilityExplorer(String explorerID, String adURL, View adView, String impressionID, ViewAbilityConfig config, ViewAbilityStats result, CallBack callBack, ViewAbilityHandler.MonitorType monitorType) {
         this.explorerID = explorerID;
         this.adURL = adURL;
         this.adView = adView;
@@ -79,6 +84,8 @@ public class ViewAbilityExplorer implements Serializable {
         this.abilityStatus = AbilityStatus.EXPLORERING;
         this.config = config;
         this.viewAbilityStats = result;
+        this.exposeCallBack = callBack;
+        this.monitorType = monitorType;
 
         //如果监测链接没有动态配置满足可视覆盖比率,使用默认Config的配置
         float coverRate;
@@ -186,33 +193,38 @@ public class ViewAbilityExplorer implements Serializable {
         if (viewFrameBlock.getMaxDuration() >= config.getMaxDuration() && viewFrameBlock.getExposeDuration() < 0.001) {
             KLog.w("ID:" + impressionID + " 已经达到最大监测时长,且当前无曝光,终止定时任务,等待数据上报,max duration:" + viewFrameBlock.getMaxDuration() + "  config duration:" + config.getInspectInterval());
             //isMeasureAbility = true;
+            monitorType = ViewAbilityHandler.MonitorType.NONVIEWABLE;
             isBreak = true;
         } else if (viewFrameBlock.getExposeDuration() >= exposeValidDuration) { // 条件2: 当前曝光时长已经满足曝光上报条件阈值
             KLog.w("ID:" + impressionID + " 已满足可视曝光时长,终止定时任务,等待数据上报");
             viewabilityState = true;
             isBreak = true;
+
+            monitorType = ViewAbilityHandler.MonitorType.VIEWABLE;
             //isMeasureAbility = true;
         } else if (adView == null) { // 条件3: AdView 释放满足上报条件
             KLog.w("ID:" + impressionID + " AdView 已被释放,终止定时任务,等待数据上报");
             //isMeasureAbility = false;
+
+            monitorType = ViewAbilityHandler.MonitorType.UNMEASURED;
             isBreak = true;
         }
 
         if (isBreak) {
-            breakToUpload();
+            breakToUpload(exposeCallBack,monitorType);
         }
     }
 
     public void stop() {
         isVideoProcessTracking = false;
         try {
-            breakToUpload();
+            breakToUpload(exposeCallBack,monitorType);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void breakToUpload() throws Exception {
+    public void breakToUpload(CallBack callBack, ViewAbilityHandler.MonitorType monitorType) throws Exception {
 
         List<HashMap<String, Object>> events = viewFrameBlock.generateUploadEvents(viewAbilityStats);
 
@@ -308,7 +320,7 @@ public class ViewAbilityExplorer implements Serializable {
 
         isViewabilityTrackFinished = true;
 
-        if (abilityCallback != null) abilityCallback.onSend(trackURL);
+        if (abilityCallback != null) abilityCallback.onSend(trackURL,callBack,monitorType);
 
         //如果没有视频进度监测,移除任务
         if (!isVideoProcessMonitor || !isVideoProcessTracking) {
@@ -325,11 +337,11 @@ public class ViewAbilityExplorer implements Serializable {
      * @param abilityCallback
      * @throws Exception
      */
-    public void breakToUpload(AbilityCallback abilityCallback) throws Exception {
+    public void breakToUpload(AbilityCallback abilityCallback, CallBack callBack, ViewAbilityHandler.MonitorType monitorType) throws Exception {
         if (this.abilityCallback == null) {
             this.abilityCallback = abilityCallback;
         }
-        this.breakToUpload();
+        this.breakToUpload(callBack,monitorType);
     }
 
     @Override
@@ -369,7 +381,7 @@ public class ViewAbilityExplorer implements Serializable {
                 if (abilityCallback != null) {
                     //adURL + separator + identifier + equalizer + process
                     String processURL = adURL + viewAbilityStats.getSeparator() + videoProcessIdentifier + viewAbilityStats.getEqualizer() + trackType.value();
-                    abilityCallback.onSend(processURL);
+                    abilityCallback.onSend(processURL,exposeCallBack,monitorType);
                 }
                 videoProgressList.remove(trackType);
             }

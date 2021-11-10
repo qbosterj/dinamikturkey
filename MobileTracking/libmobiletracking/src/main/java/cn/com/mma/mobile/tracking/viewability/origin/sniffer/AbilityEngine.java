@@ -10,7 +10,10 @@ import android.os.Process;
 import android.view.View;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import cn.com.mma.mobile.tracking.api.ViewAbilityHandler;
 import cn.com.mma.mobile.tracking.util.klog.KLog;
+import cn.com.mma.mobile.tracking.viewability.origin.CallBack;
 import cn.com.mma.mobile.tracking.viewability.origin.ViewAbilityEventListener;
 import cn.com.mma.mobile.tracking.viewability.origin.ViewAbilityPresenter;
 import cn.com.mma.mobile.tracking.viewability.origin.ViewAbilityService;
@@ -54,9 +57,10 @@ public class AbilityEngine implements ViewAbilityPresenter {
 
 
     @Override
-    public void stopForStrongInteract(String explorerID) {
+    public void stopForStrongInteract(String explorerID,Bundle bundle) {
         Message message = engineHandler.obtainMessage(MESSAGE_STOPFORSTRONGINTERACT);
         message.obj = explorerID;
+        message.setData(bundle);
         engineHandler.sendMessage(message);
     }
 
@@ -92,7 +96,11 @@ public class AbilityEngine implements ViewAbilityPresenter {
                         break;
 
                     case MESSAGE_STOPFORSTRONGINTERACT:
-                        abilityWorker.stopWorkerForStrongInteract((String) msg.obj);
+                        //强交互传递回调对象
+                        Bundle forbundle = msg.getData();
+                        CallBack callBack = (CallBack) forbundle.getSerializable(ViewAbilityService.BUNDLE_CALLBACK);
+                        ViewAbilityHandler.MonitorType monitorType = (ViewAbilityHandler.MonitorType) forbundle.getSerializable(ViewAbilityService.BUNDLE_MONTYPE);
+                        abilityWorker.stopWorkerForStrongInteract((String) msg.obj,callBack,monitorType);
                         break;
                     default:
                         break;
@@ -116,8 +124,10 @@ public class AbilityEngine implements ViewAbilityPresenter {
             String impressionID = bundle.getString(ViewAbilityService.BUNDLE_IMPRESSIONID);
             String explorerID = bundle.getString(ViewAbilityService.BUNDLE_EXPLORERID);
             ViewAbilityStats result = (ViewAbilityStats) bundle.getSerializable(ViewAbilityService.BUNDLE_VBRESULT);
+            CallBack callBack = (CallBack) bundle.getSerializable(ViewAbilityService.BUNDLE_CALLBACK);
+            ViewAbilityHandler.MonitorType monitorType = (ViewAbilityHandler.MonitorType) bundle.getSerializable(ViewAbilityService.BUNDLE_MONTYPE);
 
-            abilityWorker.addWorker(adURL, adView, impressionID, explorerID, result);
+            abilityWorker.addWorker(adURL, adView, impressionID, explorerID, result,callBack,monitorType);
         }
     }
 

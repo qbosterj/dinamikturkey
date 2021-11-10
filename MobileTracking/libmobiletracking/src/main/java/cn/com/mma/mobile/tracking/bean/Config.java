@@ -13,6 +13,8 @@ public class Config {
     public List<Event> events;
     public HashMap<String, Argument> adplacements;
     public HashMap<String, Argument> viewabilityarguments;
+    public HashMap<String, Argument> sensorarguments;
+
 
 
 

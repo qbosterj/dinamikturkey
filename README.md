@@ -127,7 +127,7 @@ SDK曝光监测接口现已升级为曝光/Track Ads接口， 支持曝光或Tra
 接口定义：
 
 ```
-public  void onExpose(String adURL,View adview,int type)
+public  void onExpose(String adURL,View adview,int type,CallBack callBack)
 ```
 
 参数说明：
@@ -137,12 +137,28 @@ public  void onExpose(String adURL,View adview,int type)
 | adURL | String | 广告位曝光监测代码 |
 | adview | View | 广告展示视图对象 |
 | type | int |0 代表Tracked Ads监测； 1 代表曝光 |
+| callBack | CallBack |监测回调对象|
+
 
 
 示例代码：
 
 ```
-Countly.sharedInstance().onExpose("http://example.com/axxx,bxxxx,c2,i0,h",adview,1);
+   Countly.sharedInstance().onExpose("http://example.com/axxx,bxxxx,c2,i0,h", adview, 1, new CallBack() {
+            /**
+             * 监测事件类型
+             * @param eventType
+             */
+            @Override
+            public void onSuccess(String eventType) {
+                //监测代码发送成功
+            }
+
+            @Override
+            public void onFailed(String errorMessage) {
+                //监测代码发送失败
+            }
+        });
 ```
 
 
@@ -152,7 +168,7 @@ Countly.sharedInstance().onExpose("http://example.com/axxx,bxxxx,c2,i0,h",adview
 接口定义：
 
 ```
-public  void onClick(String adURL)
+public  void onClick(String adURL,CallBack callBack)
 ```
 
 参数说明：
@@ -160,11 +176,26 @@ public  void onClick(String adURL)
 | 参数    | 类型     | 说明        |
 | ----- | ------ | --------- |
 | adURL | String | 广告位点击监测代码 |
+| callBack | CallBack |监测回调对象|
 
 示例代码：
 
 ```
-Countly.sharedInstance().onClick("http://example.com/axxx,bxxxx,c3,i0,h");
+ Countly.sharedInstance().onClick("http://example.com/axxx,bxxxx,c3,i0,h", new CallBack() {
+            /**
+             * 监测事件类型
+             * @param eventType
+             */
+            @Override
+            public void onSuccess(String eventType) {
+ 					//监测代码发送成功
+            }
+
+            @Override
+            public void onFailed(String errorMessage) {
+ 					//监测代码发送失败
+            }
+        });
 ```
 
 
@@ -177,7 +208,7 @@ Countly.sharedInstance().onClick("http://example.com/axxx,bxxxx,c3,i0,h");
 接口定义：
 
 ```
-public  void onExpose(String adURL, View adView) 
+public void onExpose(String adURL, View adView,CallBack callBack)
 ```
 
 参数说明：
@@ -186,13 +217,28 @@ public  void onExpose(String adURL, View adView)
 | ------ | ------ | --------- |
 | adURL  | String | 广告位曝光监测代码 |
 | adView | View   | 广告展示视图对象  |
+| callBack | CallBack |监测回调对象|
 
 注意：对于需要可见性曝光的广告监测，第二个参数（**View**）为必选项，且需要传入当前广告展示的视图对象，否则可能造成SDK无法成功可见性曝光监测。
 
 示例代码：
 
 ```
-Countly.sharedInstance().onExpose("http://vxyz.admaster.com.cn/w/a86218,b1778712,c2343,i0,m202,8a2,8b2,2j,h",adview);
+   Countly.sharedInstance().onExpose("http://vxyz.admaster.com.cn/w/a86218,b1778712,c2343,i0,m202,8a2,8b2,2j,h", adview, new CallBack() {
+            /**
+             * 监测事件类型
+             * @param eventType
+             */
+            @Override
+            public void onSuccess(String eventType) {
+                //监测代码发送成功
+            }
+
+            @Override
+            public void onFailed(String errorMessage) {
+				//监测代码发送失败
+            }
+        });
 ```
 
 
@@ -202,7 +248,8 @@ Countly.sharedInstance().onExpose("http://vxyz.admaster.com.cn/w/a86218,b1778712
 接口定义：
 
 ```
-public void onVideoExpose(String adURL, View videoView, int videoPlayType)
+public void onVideoExpose(String adURL, View videoView, int videoPlayType,CallBack callBack)
+
 ```
 
 参数说明：
@@ -212,14 +259,29 @@ public void onVideoExpose(String adURL, View videoView, int videoPlayType)
 | adURL         | String | 广告位曝光监测代码                      |
 | videoView     | View   | 视频广告展示视图对象                     |
 | videoPlayType | int    | 视频播放类型<br>1-自动播放，2-手动播放，0-无法识别 |
+| callBack | CallBack |监测回调对象|
 
 注意：对于需要可见性视频曝光的广告监测，第二个参数（**View**）为必选项，需要传入当前广告展示的视图对象且监测代码需要配置**视频时长及进度监测点**，否则可能造成SDK无法成功可见性视频曝光监测。
 
 示例代码：
 
 ```
-        String adURL = "http://v.admaster.com.cn/i/a90981,b1899468,c2,i0,m202,8a2,8b2,2p,2u2,2g,2f=3,2v50,2w15,2x0010,va1,2a2p,2j,2d1234,h";
-        Countly.sharedInstance().onVideoExpose(adURL, adView, 2);
+       String adURL = "http://v.admaster.com.cn/i/a90981,b1899468,c2,i0,m202,8a2,8b2,2p,2u2,2g,2f=3,2v50,2w15,2x0010,va1,2a2p,2j,2d1234,h";
+        Countly.sharedInstance().onVideoExpose(adURL, adView, 2, new CallBack() {
+            /**
+             * 监测事件类型
+             * @param eventType
+             */
+            @Override
+            public void onSuccess(String eventType) {
+                //监测代码发送成功
+            }
+
+            @Override
+            public void onFailed(String errorMessage) {
+				//监测代码发送失败
+            }
+        });
 ```
 
 

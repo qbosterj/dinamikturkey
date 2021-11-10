@@ -781,12 +781,46 @@
                     </argument>
 
                 </viewabilityarguments>
+                <!-- 反作弊-->
+                <sensorarguments>
+                    <!-- 是否越狱 -->
+                    <argument>
+                        <key>isRoot</key>
+                        <value>l1</value>
+                        <urlEncode>true</urlEncode>
+                        <isRequired>true</isRequired>
+                    </argument>
+                    <!-- 是否模拟器 -->
+                    <argument>
+                        <key>isSimulator</key>
+                        <value>l2</value>
+                        <urlEncode>true</urlEncode>
+                        <isRequired>true</isRequired>
+                    </argument>
+                    <!-- 是否hook -->
+                    <argument>
+                        <key>isHook</key>
+                        <value>l3</value>
+                        <urlEncode>true</urlEncode>
+                        <isRequired>true</isRequired>
+                    </argument>
+                    <!-- 是否刷机 -->
+                    <argument>
+                        <key>isAdb</key>
+                        <value>l4</value>
+                        <urlEncode>true</urlEncode>
+                        <isRequired>true</isRequired>
+                    </argument>
+                </sensorarguments>
             </config>
             <separator>&amp;</separator>
             <!--<separator>&amp;</separator>-->
             <!--ADID服务端地址-->
             <adidurl>https://g.cn.miaozhen.com/x/k=adid</adidurl>
-            
+
+            <!--是否启用反作弊配置字段-->
+
+            <antidevice>svl</antidevice>
 
             <equalizer>=</equalizer>
 

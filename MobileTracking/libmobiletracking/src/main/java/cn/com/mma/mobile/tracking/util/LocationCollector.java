@@ -123,32 +123,33 @@ public class LocationCollector {
                     //如果是GPS
                     locationProvider = LocationManager.GPS_PROVIDER;
                     location = locationManager.getLastKnownLocation(locationProvider);
+
                 }
 
                 if (location == null && providers.contains(LocationManager.NETWORK_PROVIDER)) {
                     locationProvider = LocationManager.NETWORK_PROVIDER;
                     location = locationManager.getLastKnownLocation(locationProvider);
+
                 }
 
                 if (TextUtils.isEmpty(locationProvider)) {
                     //Log.w(TAG, "no available Location Provider!");
                     return;
                 }
-
                //Log.d(TAG, "locationProvider:" + locationProvider + "  LastKnownLocation is :" + location);
 
                 if (location != null) {
+//                    Logger.i("获取地理位置定位信息location != null");
                     //不为空,显示地理位置经纬度
                     //long end = System.currentTimeMillis();
                     //String cost = String.valueOf(end - start) + " ms";
-                    //Log.d(TAG, "cost:" + cost + " lat:" + location.getLatitude() + "  lon:" + location.getLongitude() + "  acc:" + location.getAccuracy() + "   time:" + location.getTime());
+//                    Logger.d( " lat:" + location.getLatitude() + "  lon:" + location.getLongitude() + "  acc:" + location.getAccuracy() + "   time:" + location.getTime());
                     currentLocation = location;
                     lastLocationTime = System.currentTimeMillis();
                 }
 
                 if (ENABLE_LOCATION_UPDATELISTENER && !isSynced) {
-
-                    //Logger.e("request Location Updates:" + lastLocationTime + ",mintime:" + LOCATION_UPDATE_MINTIME + ",distance:" + LOCATION_UPDATE_MINDISTANCE);
+//                    Logger.e("request Location Updates:" + lastLocationTime + ",mintime:" + LOCATION_UPDATE_MINTIME + ",distance:" + LOCATION_UPDATE_MINDISTANCE);
 
                     final String provider = locationProvider;
 
@@ -156,6 +157,7 @@ public class LocationCollector {
                         @Override
                         public void run() {
                             locationManager.requestLocationUpdates(provider, LOCATION_UPDATE_MINTIME, LOCATION_UPDATE_MINDISTANCE, locationListener);
+
                         }
                     });
 
