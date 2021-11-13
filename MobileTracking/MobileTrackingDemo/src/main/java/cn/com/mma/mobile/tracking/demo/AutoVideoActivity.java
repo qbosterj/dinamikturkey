@@ -14,6 +14,8 @@ import android.widget.TextView;
 import android.widget.VideoView;
 
 import cn.com.mma.mobile.tracking.api.Countly;
+import cn.com.mma.mobile.tracking.util.Logger;
+import cn.com.mma.mobile.tracking.viewability.origin.CallBack;
 
 
 /**
@@ -77,7 +79,18 @@ public class AutoVideoActivity extends BaseActivity {
                         //进度监听事件
                         videoView.setOnCompletionListener(videoProgressListener);
                         //进入页面后
-                        Countly.sharedInstance().onVideoExpose(VIDEO_EXPOSE_URL, videoView, 2);
+                        Countly.sharedInstance().onVideoExpose(VIDEO_EXPOSE_URL, videoView, 2, new CallBack() {
+                            @Override
+                            public void onSuccess(String exposeUrl) {
+                                Logger.i("可视化视频自动播放：" +  exposeUrl);
+
+                            }
+
+                            @Override
+                            public void onFailed(String errorMessage) {
+
+                            }
+                        });
 
                     }else {
                         videoButton.setText("播放");

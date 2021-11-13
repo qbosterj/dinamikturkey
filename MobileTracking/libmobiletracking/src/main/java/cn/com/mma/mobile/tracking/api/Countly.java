@@ -21,6 +21,7 @@ import cn.com.mma.mobile.tracking.util.Logger;
 import cn.com.mma.mobile.tracking.util.SdkConfigUpdateUtil;
 import cn.com.mma.mobile.tracking.util.SharedPreferencedUtil;
 import cn.com.mma.mobile.tracking.util.klog.KLog;
+import cn.com.mma.mobile.tracking.viewability.origin.CallBack;
 import cn.com.mma.mobile.tracking.viewability.origin.ViewAbilityEventListener;
 
 /**
@@ -217,19 +218,18 @@ public class Countly {
      * 普通点击事件监测接口
      * @param adURL 监测链接
      */
-    public  void onClick(String adURL) {
+    public  void onClick(String adURL,CallBack callBack) {
 
-        triggerEvent(EVENT_CLICK, adURL, null,0);
+        triggerEvent(EVENT_CLICK, adURL, null,0,callBack);
     }
 
     /**
      * 普通曝光事件监测接口
      * @param adURL 监测链接
      */
-    public  void onExpose(String adURL,View adview,int type) {
+    public  void onExpose(String adURL,View adview,int type,CallBack callBack) {
 
-
-        triggerEvent(EVENT_EXPOSE, adURL, adview,type);
+        triggerEvent(EVENT_EXPOSE, adURL, adview,type,callBack);
     }
 
     /**
@@ -237,7 +237,7 @@ public class Countly {
      * @param adURL 监测链接
      * @param adView 监测广告视图对象
      */
-    public void onExpose(String adURL, View adView) {
+    public void onExpose(String adURL, View adView,CallBack callBack) {
 
 //        adView.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -248,7 +248,7 @@ public class Countly {
 //            }
 //        });
 
-        triggerEvent(EVENT_VIEWABILITY_EXPOSE, adURL, adView,0);
+        triggerEvent(EVENT_VIEWABILITY_EXPOSE, adURL, adView,0,callBack);
     }
 
     /**
@@ -258,10 +258,10 @@ public class Countly {
      * @param videoView 监测广告视频对象
      * @param videoPlayType 视频播放类型，1-自动播放，2-手动播放，0-无法识别
      */
-    public void onVideoExpose(String adURL, View videoView, int videoPlayType) {
+    public void onVideoExpose(String adURL, View videoView, int videoPlayType,CallBack callBack) {
 
 
-        triggerVideoEvent(EVENT_VIEWABILITY_VIDEOEXPOSE, adURL, videoView, videoPlayType);
+        triggerVideoEvent(EVENT_VIEWABILITY_VIDEOEXPOSE, adURL, videoView, videoPlayType,callBack);
     }
 
     /**
@@ -327,18 +327,18 @@ public class Countly {
 
 
 
-    private  void triggerEvent(String eventName, String adURL, View adView,int type) {
-        triggerEvent(eventName, adURL, adView, 0, type);
+    private  void triggerEvent(String eventName, String adURL, View adView,int type,CallBack callBack) {
+        triggerEvent(eventName, adURL, adView, 0, type,callBack);
 
     }
 
-    private  void triggerVideoEvent(String eventName, String adURL, View adView,int videoPlaytype) {
-        triggerEvent(eventName, adURL, adView, videoPlaytype, 0);
+    private  void triggerVideoEvent(String eventName, String adURL, View adView,int videoPlaytype,CallBack callBack) {
+        triggerEvent(eventName, adURL, adView, videoPlaytype, 0,callBack);
     }
 
 
 
-    private  void triggerEvent(String eventName, String adURL, View adView, int videoPlayType,int type) {
+    private  void triggerEvent(String eventName, String adURL, View adView, int videoPlayType, int type, CallBack callBack) {
 
 
         if (sIsInitialized == false || mUrildBuilder == null) {
@@ -352,16 +352,16 @@ public class Countly {
 
         switch (eventName) {
             case EVENT_CLICK:
-                viewAbilityHandler.onClick(adURL);
+                viewAbilityHandler.onClick(adURL,callBack);
                 break;
             case EVENT_EXPOSE:
-                viewAbilityHandler.onExpose(adURL,adView,type);
+                viewAbilityHandler.onExpose(adURL,adView,type,callBack);
                 break;
             case EVENT_VIEWABILITY_EXPOSE:
-                viewAbilityHandler.onExpose(adURL, adView);
+                viewAbilityHandler.onExpose(adURL, adView,callBack);
                 break;
             case EVENT_VIEWABILITY_VIDEOEXPOSE:
-                viewAbilityHandler.onVideoExpose(adURL, adView, videoPlayType);
+                viewAbilityHandler.onVideoExpose(adURL, adView, videoPlayType,callBack);
                 break;
 
         }
@@ -423,9 +423,9 @@ public class Countly {
      */
     private ViewAbilityEventListener viewAbilityEventListener = new ViewAbilityEventListener() {
         @Override
-        public void onEventPresent(String adURL) {
+        public void onEventPresent(String adURL, CallBack callBack, ViewAbilityHandler.MonitorType monitortype) {
             if (sIsInitialized && mUrildBuilder != null) {
-                mUrildBuilder.recordEvent(adURL);
+                mUrildBuilder.recordEvent(adURL,callBack,monitortype);
             }
         }
     };

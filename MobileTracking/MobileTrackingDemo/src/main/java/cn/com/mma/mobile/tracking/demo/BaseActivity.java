@@ -10,7 +10,9 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import cn.com.mma.mobile.tracking.api.Countly;
+import cn.com.mma.mobile.tracking.util.Logger;
 import cn.com.mma.mobile.tracking.util.klog.KLog;
+import cn.com.mma.mobile.tracking.viewability.origin.CallBack;
 
 
 /**
@@ -96,7 +98,19 @@ public abstract class BaseActivity extends AppCompatActivity {
 
 
     protected void toLandingPage(Context context, String destURL) {
-        Countly.sharedInstance().onClick(destURL);
+        Countly.sharedInstance().onClick(destURL, new CallBack() {
+            @Override
+            public void onSuccess(String exposeUrl) {
+
+                Logger.i("点击回调："  + exposeUrl);
+
+            }
+
+            @Override
+            public void onFailed(String errorMessage) {
+
+            }
+        });
         Intent intent = new Intent(context, LandingPageActivity.class);
         startActivity(intent);
         Toast.makeText(this, "to LandingPage", Toast.LENGTH_SHORT).show();

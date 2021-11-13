@@ -6,12 +6,12 @@ import java.util.Set;
 import android.content.Context;
 import android.content.Intent;
 import android.text.TextUtils;
-
 import cn.com.mma.mobile.tracking.util.CommonUtil;
 import cn.com.mma.mobile.tracking.util.ConnectUtil;
 import cn.com.mma.mobile.tracking.util.DeviceInfoUtil;
 import cn.com.mma.mobile.tracking.util.Logger;
 import cn.com.mma.mobile.tracking.util.SharedPreferencedUtil;
+import cn.com.mma.mobile.tracking.viewability.origin.CallBack;
 
 /**
  * 发送消息的线程
@@ -69,12 +69,21 @@ public class SendMessageThread extends Thread {
                             } else {
                                 requestList.add(eventData);
                             }
-
                             byte[] response = connectUtil.performGet(eventData);
+
+                            CallBack callBack = RecordEventMessage.RequestHashMap.get(eventData);
+                            ViewAbilityHandler.MonitorType monitorType = RecordEventMessage.MonitorTypeHashMap.get(eventData);
                             if (response == null) {
                                 handleFailedResult(eventData, eventExpireTime);
+                                if(callBack != null){
+                                    callBack.onFailed(monitorType.toString() + eventData);
+                                }
                                 return;
                             } else {
+                                if(callBack != null){
+                                   callBack.onSuccess(monitorType.toString() + eventData);
+//                                   Logger.i("事件类型:" + monitorType);
+                                }
                                 Logger.i("record [" + CommonUtil.md5(eventData) + "] upload succeed.");
                                 handleSuccessResult(spName, eventData);
                                 //[LOCALTEST] 测试计数:记录发送成功

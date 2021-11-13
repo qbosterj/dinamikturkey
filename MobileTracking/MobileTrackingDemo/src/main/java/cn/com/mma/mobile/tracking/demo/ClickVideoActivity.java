@@ -13,6 +13,8 @@ import android.widget.TextView;
 import android.widget.VideoView;
 
 import cn.com.mma.mobile.tracking.api.Countly;
+import cn.com.mma.mobile.tracking.util.Logger;
+import cn.com.mma.mobile.tracking.viewability.origin.CallBack;
 
 
 /**
@@ -82,7 +84,18 @@ public class ClickVideoActivity extends BaseActivity {
             //进度监听事件
             videoView.setOnCompletionListener(videoProgressListener);
 
-            Countly.sharedInstance().onVideoExpose(VIDEO_EXPOSE_URL, videoView, 1);
+            Countly.sharedInstance().onVideoExpose(VIDEO_EXPOSE_URL, videoView, 1, new CallBack() {
+                @Override
+                public void onSuccess(String exposeUrl) {
+                    Logger.i("可视化视频曝光回调："  + exposeUrl);
+
+                }
+
+                @Override
+                public void onFailed(String errorMessage) {
+
+                }
+            });
 
         } catch (Exception e) {
             e.printStackTrace();

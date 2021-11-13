@@ -4,7 +4,11 @@ import android.Manifest;
 import android.content.Context;
 import android.os.Build;
 import android.text.TextUtils;
+
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -12,6 +16,7 @@ import java.util.regex.Pattern;
 import cn.com.mma.mobile.tracking.bean.Argument;
 import cn.com.mma.mobile.tracking.bean.Company;
 import cn.com.mma.mobile.tracking.bean.SDK;
+import cn.com.mma.mobile.tracking.util.AntiConstantStats;
 import cn.com.mma.mobile.tracking.util.AppListUploader;
 import cn.com.mma.mobile.tracking.util.CommonUtil;
 import cn.com.mma.mobile.tracking.util.DeviceInfoUtil;
@@ -20,7 +25,8 @@ import cn.com.mma.mobile.tracking.util.Logger;
 import cn.com.mma.mobile.tracking.util.Reflection;
 import cn.com.mma.mobile.tracking.util.SdkConfigUpdateUtil;
 import cn.com.mma.mobile.tracking.util.SharedPreferencedUtil;
-
+import cn.com.mma.mobile.tracking.viewability.origin.CallBack;
+import cn.com.mma.mobile.tracking.viewability.origin.ViewAbilityStats;
 
 /**
  * 记录事件
@@ -28,6 +34,8 @@ import cn.com.mma.mobile.tracking.util.SharedPreferencedUtil;
 public class RecordEventMessage {
     private final Context context;
     private static RecordEventMessage mInstance;
+    public static HashMap<String,CallBack> RequestHashMap;
+    public static HashMap<String, ViewAbilityHandler.MonitorType> MonitorTypeHashMap;
 
     private RecordEventMessage(final Context context) {
         if (context == null) {
@@ -41,14 +49,16 @@ public class RecordEventMessage {
             synchronized (RecordEventMessage.class) {
                 if (mInstance == null) {
                     mInstance = new RecordEventMessage(ctx);
+                    RequestHashMap = new HashMap<>();
+                    MonitorTypeHashMap = new HashMap<>();
                 }
             }
         }
         return mInstance;
     }
 
+    protected synchronized void recordEvent(String originURL, CallBack callBack, ViewAbilityHandler.MonitorType monitorType) {
 
-    protected synchronized void recordEvent(String originURL) {
 
         String adURL = originURL.trim();
         long timestamp = System.currentTimeMillis();
@@ -59,7 +69,6 @@ public class RecordEventMessage {
             Logger.e("没有读取到监测配置文件,当前事件无法监测!");
             return;
         }
-
         String host = "";
         try {
             host= CommonUtil.getHostURL(adURL);
@@ -71,17 +80,20 @@ public class RecordEventMessage {
             }
         } catch (Exception e) {
         }
-
         if (company == null) {
             Logger.w("监测链接: \'" + originURL + "\' 没有对应的配置项,请检查sdkconfig.xml");
             return;
         }
 
+
+        //获取配置文件相关
+        AntiConstantStats antiConstantStats = new AntiConstantStats();
+        antiConstantStats.setSensorarguments(company.config.sensorarguments);
+
         Map<String,String> deviceInfoParams = DeviceInfoUtil.getDeviceInfo(context);
 
         StringBuilder builder = new StringBuilder();
         try {
-
             String separator = company.separator;
             String equalizer = company.equalizer;
 
@@ -160,6 +172,29 @@ public class RecordEventMessage {
                 }
             }
 
+            String anti = company.antidevice;
+
+            JSONObject result_jsonObject = new JSONObject();
+
+            if(!TextUtils.isEmpty(anti)){
+                if(!TextUtils.isEmpty(antiConstantStats.get(AntiConstantStats.isRoot))){
+                    result_jsonObject.put(antiConstantStats.get(AntiConstantStats.isRoot),DeviceInfoUtil.checkRootFile());
+                }
+                if(!TextUtils.isEmpty(antiConstantStats.get(AntiConstantStats.isSimulator))){
+                    result_jsonObject.put(antiConstantStats.get(AntiConstantStats.isSimulator),DeviceInfoUtil.isEmulator(context));
+                }
+                if(!TextUtils.isEmpty(antiConstantStats.get(AntiConstantStats.isHook))){
+                    result_jsonObject.put(antiConstantStats.get(AntiConstantStats.isHook),DeviceInfoUtil.getXposedCheckJar());
+                }
+                if(!TextUtils.isEmpty(antiConstantStats.get(AntiConstantStats.isAdb))){
+                    result_jsonObject.put(antiConstantStats.get(AntiConstantStats.isAdb),DeviceInfoUtil.getCheckAdb(context));
+                }
+                builder.append(separator);
+                builder.append(anti);
+                builder.append(equalizer);
+//                builder.append(result_jsonObject.toString());
+                builder.append(CommonUtil.encodingUTF8(result_jsonObject.toString()));
+            }
             //signature
             if (company.signature != null && company.signature.paramKey != null) {
                 //String signStr = CommonUtil.getSignature(context, builder.toString());
@@ -186,10 +221,8 @@ public class RecordEventMessage {
                 }
 
             }
-
             //redirectURL
             builder.append(redirectUrlValue);
-
 
         } catch (Exception e) {
             Logger.e(e.getMessage());
@@ -198,7 +231,15 @@ public class RecordEventMessage {
         String exposeURL = builder.toString();
         long expirationTime = getEventExpirationTime(company, timestamp);
         //Logger.d(" exposeURL:" + exposeURL + "   expirationTime is:" + expirationTime);
+
+        //可见曝光的普通曝光
+        if(monitorType == ViewAbilityHandler.MonitorType.EXPOSEWITHABILITY || monitorType == ViewAbilityHandler.MonitorType.VIDEOEXPOSEWITHABILITY){
+            monitorType = ViewAbilityHandler.MonitorType.IMPRESSION;
+        }
         //在这里添加立即发送逻辑
+        RequestHashMap.put(exposeURL,callBack);
+        //保存曝光类型的状态
+        MonitorTypeHashMap.put(exposeURL,monitorType);
         SharedPreferencedUtil.putLong(context, SharedPreferencedUtil.SP_NAME_NORMAL, exposeURL, expirationTime);
 
         //检查是否可以上报APPLIST

@@ -123,6 +123,14 @@ public class CommonUtil {
         return hostURL;
     }
 
+
+    public static String getType(String str,String exposeUrl){
+
+
+    	return null;
+
+	}
+
 //	/**
 //	 * 获得签名
 //	 *

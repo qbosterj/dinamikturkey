@@ -1,17 +1,21 @@
 package cn.com.mma.mobile.tracking.util;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.security.MessageDigest;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,6 +29,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
@@ -64,6 +69,17 @@ public class DeviceInfoUtil {
 	public static String mainDic = Environment.getExternalStorageDirectory().toString();
 	public static String[] subDics = new String[]{"/.aaa/ddd/", "/.bbb/ddd", "/.ccc/ddd"};
 	public static String ADID = "unknow";
+
+	public String viewAbilityidentifier;
+
+	public void setViewAbilityidentifier(String viewAbilityidentifier) {
+		this.viewAbilityidentifier = viewAbilityidentifier;
+	}
+
+	public String getViewAbilityidentifier() {
+		return viewAbilityidentifier;
+	}
+
 
 
 	/**
@@ -853,7 +869,86 @@ public class DeviceInfoUtil {
 
 	}
 
+	/**
+	 * Xposed jar检测
+	 * @return
+	 */
+	public static int getXposedCheckJar(){
+		try {
+			int isHook = 0;
+			Set<String> libraries = new HashSet();
+			String mapsFilename = "/proc/" + android.os.Process.myPid() + "/maps";
+			BufferedReader reader = new BufferedReader(new FileReader(mapsFilename));
+			String line;
+			while ((line = reader.readLine()) != null) {
+				if (line.endsWith(".so") || line.endsWith(".jar")) {
+					int n = line.lastIndexOf(" ");
+					libraries.add(line.substring(n + 1));
+				}
+			}
+			for (String library : libraries) {
+				if (library.contains("com.saurik.substrate")) {
+					Logger.i( "Substrate shared object found: " + library);
+					isHook = 1;
+				}
+				if (library.contains("XposedBridge.jar")) {
+//					Logger.i("Xposed JAR found: " + library);
+					isHook = 1;
+				}
+			}
+			reader.close();
+			return isHook;
+		} catch (Exception e) {
+			Logger.i(e.toString());
+		}
+		return 0;
+	}
 
+
+	//检查设备是否具备root权限
+	public static int checkRootFile() {
+		File file = null;
+		String[] paths = {"/sbin/su", "/system/bin/su", "/system/xbin/su", "/data/local/xbin/su", "/data/local/bin/su", "/system/sd/xbin/su",
+				"/system/bin/failsafe/su", "/data/local/su"};
+		for (String path : paths) {
+			file = new File(path);
+			if (file.exists()) return 1;
+		}
+		return 0;
+	}
+
+	/**
+	 * 判断设备是否开启adb调试模式
+	 * @param context
+	 * @return
+	 */
+	public static int getCheckAdb(Context context){
+		return  (Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.ADB_ENABLED, 0) > 0) ? 1 :0;//判断adb调试模式是否打开
+
+	}
+
+	/**
+	 * 判断当前设备是否为模拟器
+	 * @param context
+	 * @return
+	 */
+	public static int isEmulator(Context context) {
+		String serial = Build.SERIAL;
+//		Logger.i("：" + serial);
+		return Build.FINGERPRINT.startsWith("generic")
+				|| Build.FINGERPRINT.toLowerCase().contains("vbox")
+				|| Build.FINGERPRINT.toLowerCase().contains("test-keys")
+				|| Build.MODEL.contains("google_sdk")
+				|| Build.MODEL.contains("Emulator")
+				|| Build.SERIAL.equalsIgnoreCase("android")
+				|| Build.MODEL.contains("Android SDK built for x86")
+				|| Build.MANUFACTURER.contains("Genymotion")
+				|| (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
+				|| "google_sdk".equals(Build.PRODUCT)
+				|| ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE))
+				.getNetworkOperatorName().toLowerCase().equals("android") ? 1 : 0;
+
+	}
 
 
 

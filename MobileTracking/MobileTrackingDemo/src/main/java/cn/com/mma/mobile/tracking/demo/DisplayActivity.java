@@ -5,6 +5,8 @@ import android.view.View;
 import android.widget.TextView;
 
 import cn.com.mma.mobile.tracking.api.Countly;
+import cn.com.mma.mobile.tracking.util.Logger;
+import cn.com.mma.mobile.tracking.viewability.origin.CallBack;
 
 
 /**
@@ -33,7 +35,18 @@ public class DisplayActivity extends BaseActivity {
 //        anim.setFillAfter(true);//动画执行完毕后停留在最后一帧
 //        adView.startAnimation(anim);
 
-        Countly.sharedInstance().onExpose(DISPLAY_EXPOSE_URL, adView );
+        Countly.sharedInstance().onExpose(DISPLAY_EXPOSE_URL, adView, new CallBack() {
+            @Override
+            public void onSuccess(String exposeUrl) {
+                Logger.i("可视化曝光回调："  + exposeUrl);
+
+            }
+
+            @Override
+            public void onFailed(String errorMessage) {
+
+            }
+        });
 
 //        new Handler().postDelayed(new Runnable(){
 //            public void run() {

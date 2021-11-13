@@ -12,7 +12,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import cn.com.mma.mobile.tracking.api.Countly;
+import cn.com.mma.mobile.tracking.api.ViewAbilityHandler;
 import cn.com.mma.mobile.tracking.util.klog.KLog;
+import cn.com.mma.mobile.tracking.viewability.origin.CallBack;
 import cn.com.mma.mobile.tracking.viewability.origin.ViewAbilityEventListener;
 import cn.com.mma.mobile.tracking.viewability.origin.ViewAbilityStats;
 
@@ -88,7 +90,7 @@ public class AbilityWorker implements AbilityCallback {
             if (cachelists != null) {
                 for (ViewAbilityExplorer cacheExplorer : cachelists) {
                     KLog.i("load cache explore item:" + cacheExplorer.toString());
-                    cacheExplorer.breakToUpload(this);
+                    cacheExplorer.breakToUpload(null,null);
                 }
             }
         } catch (Exception e) {
@@ -100,7 +102,7 @@ public class AbilityWorker implements AbilityCallback {
     /**
      * 添加一个工作者
      */
-    public void addWorker(String adURL, View adView, String impressionID, String explorerID, ViewAbilityStats result) {
+    public void addWorker(String adURL, View adView, String impressionID, String explorerID, ViewAbilityStats result, CallBack callBack, ViewAbilityHandler.MonitorType monitorType) {
 
         try {
 
@@ -109,12 +111,12 @@ public class AbilityWorker implements AbilityCallback {
             //当前Work池内已存在 停止并上报 使用新的监测覆盖
             if (existExplore != null) {
                 KLog.w("当前广告位:" + explorerID + " 已经存在,停止监测并UPLOAD,当前任务重新开启!");
-                existExplore.breakToUpload();
+                existExplore.breakToUpload(callBack,monitorType);
                 //explorers.remove(existExplore);
                 explorers.remove(explorerID);
             }
 
-            ViewAbilityExplorer normalExplorer = new ViewAbilityExplorer(explorerID, adURL, adView, impressionID, config, result);
+            ViewAbilityExplorer normalExplorer = new ViewAbilityExplorer(explorerID, adURL, adView, impressionID, config, result,callBack,monitorType);
             //收集完数据回调到本类内使用mmasdk发送最终监测URL
             normalExplorer.setAbilityCallback(this);
             explorers.put(explorerID, normalExplorer);
@@ -143,7 +145,7 @@ public class AbilityWorker implements AbilityCallback {
     /**
      * 产生强交互行为，停止监测立即上报
      */
-    public void stopWorkerForStrongInteract(String explorerID) {
+    public void stopWorkerForStrongInteract(String explorerID, CallBack callBack, ViewAbilityHandler.MonitorType monitorType) {
         ViewAbilityExplorer existExplore = explorers.get(explorerID);
         KLog.d("stopWorker->ID:" + explorerID + " existExplore:" + existExplore);
         //当前Work池内存在 停止并上报，
@@ -152,7 +154,8 @@ public class AbilityWorker implements AbilityCallback {
             //设置为强交互行为
             existExplore.setStrongInteract(true);
             try {
-                existExplore.breakToUpload();
+                //强交互的时候返回类型是可见
+                existExplore.breakToUpload(callBack, ViewAbilityHandler.MonitorType.VIEWABLE);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -163,12 +166,12 @@ public class AbilityWorker implements AbilityCallback {
     }
 
     @Override
-    public void onSend(final String trackURL) {
+    public void onSend(final String trackURL, final  CallBack callBack, final ViewAbilityHandler.MonitorType monitorType) {
         new Thread(new Runnable() {
             @Override
             public void run() {
 
-                mmaSdk.onEventPresent(trackURL);
+                mmaSdk.onEventPresent(trackURL,callBack,monitorType);
                 KLog.v(",ID:" + trackURL + "监测完成,移除对应的数据");
 
                 //[LOCALTEST] 测试计数:带ViewAbility曝光事件产生计数
@@ -218,7 +221,6 @@ public class AbilityWorker implements AbilityCallback {
                         explorer.onExplore(mContext);
                     }
                 }
-
                 //遍历完毕移除已经完成或失效的工作者
                 for (String explorerID : invalidExplorers) {
                     explorers.remove(explorerID);
