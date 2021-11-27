@@ -16,10 +16,8 @@ public class Constant {
 	 * 对应<offlineCache>中的<timeout>字段
 	 */
 	public static int OFFLINECACHE_TIMEOUT = 15;
-
     /* 正常队列间隔周期 10s */
     public static int ONLINECACHE_QUEUEEXPIRATIONSECS = 10;
-
 	/**
 	 * 先获得位置信息，如需要才发送给服务器，这样能减少延迟。
 	 */
