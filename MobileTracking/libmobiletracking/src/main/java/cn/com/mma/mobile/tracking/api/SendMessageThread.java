@@ -76,12 +76,12 @@ public class SendMessageThread extends Thread {
                             if (response == null) {
                                 handleFailedResult(eventData, eventExpireTime);
                                 if(callBack != null){
-                                    callBack.onFailed(monitorType.toString() + eventData);
+                                    callBack.onFailed(monitorType.toString() + "MMA_URL Failed To Send");
                                 }
                                 return;
                             } else {
                                 if(callBack != null){
-                                   callBack.onSuccess(monitorType.toString() + eventData);
+                                   callBack.onSuccess(monitorType.toString());
 //                                   Logger.i("事件类型:" + monitorType);
                                 }
                                 Logger.i("record [" + CommonUtil.md5(eventData) + "] upload succeed.");
