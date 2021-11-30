@@ -51,7 +51,6 @@ public class Constant {
 	public static final String REDIRECTURL = "REDIRECTURL";
 	/** frame参数中的分隔符 */
 	public static final String DIVIDE_MULT = "X";
-
 	public static final String TRACKING_SDKVS = "SDKVS";
 	public static final String TRACKING_SDKVS_VALUE = "V2.2.0"; //SDK版本号
 
