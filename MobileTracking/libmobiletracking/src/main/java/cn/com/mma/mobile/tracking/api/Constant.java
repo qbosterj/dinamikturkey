@@ -40,7 +40,6 @@ public class Constant {
 	public static final String TRACKING_WIFIBSSID = "WIFIBSSID";
 	//新增华为设备ID标识，OAID
 	public static final String TRACKING_OAID = "OAID";
-
 	public static final String TRACKING_ADID = "ADID";
 	public static final String TRACKING_IMEI = "IMEI";
 	public static final String TRACKING_RAWIMEI = "RAWIMEI";
@@ -60,7 +59,6 @@ public class Constant {
 	public static final int NORMAL_MESSAGE_DEFAULT_PEROID = 30 * 1000;
 	public static final int FAILED_MESSAGE_DEFAULT_PEROID = 60 * 60 * 1000;
 	public static final int LOCATIOON_UPDATE_INTERVAL = 60 * 60 * 1000;
-
 	public static final long TIME_THREE_DAY = 3 * 24 * 60 * 60 * 1000;
 	public static final long TIME_ONE_DAY = 24 * 60 * 60 * 1000;//一天的毫秒数
 
