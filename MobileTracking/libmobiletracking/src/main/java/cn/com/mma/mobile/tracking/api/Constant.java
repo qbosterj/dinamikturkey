@@ -52,7 +52,6 @@ public class Constant {
 	public static final String DIVIDE_MULT = "X";
 	public static final String TRACKING_SDKVS = "SDKVS";
 	public static final String TRACKING_SDKVS_VALUE = "V2.2.0"; //SDK版本号
-
 	/**
 	 * 新版常量 Begin
 	 */
@@ -61,7 +60,6 @@ public class Constant {
 	public static final int LOCATIOON_UPDATE_INTERVAL = 60 * 60 * 1000;
 	public static final long TIME_THREE_DAY = 3 * 24 * 60 * 60 * 1000;
 	public static final long TIME_ONE_DAY = 24 * 60 * 60 * 1000;//一天的毫秒数
-
 	// 网络参数配置
 	public static int DEFAULT_MAX_CONNECTIONS = 30;
 //	public static int DEFAULT_SOCKET_TIMEOUT = 30 * 1000;

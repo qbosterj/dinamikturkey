@@ -47,7 +47,6 @@ public class SendMessageThread extends Thread {
     public void run() {
         sendData();
     }
-
     private synchronized void sendData() {
         synchronized (object) {
             Set eventSets = SharedPreferencedUtil.getSharedPreferences(context, spName).getAll().keySet();
@@ -76,7 +75,7 @@ public class SendMessageThread extends Thread {
                             if (response == null) {
                                 handleFailedResult(eventData, eventExpireTime);
                                 if(callBack != null){
-                                    callBack.onFailed(monitorType.toString() + "MMA_URL Failed To Send");
+                                    callBack.onFailed(monitorType.toString() + ":MMA_URL Failed To Send");
                                 }
                                 return;
                             } else {
@@ -133,9 +132,7 @@ public class SendMessageThread extends Thread {
                         SharedPreferencedUtil.SP_NAME_OTHER, key, failedTime);
             }
         }
-
         requestList.remove(key);
-
     }
 
     /**
