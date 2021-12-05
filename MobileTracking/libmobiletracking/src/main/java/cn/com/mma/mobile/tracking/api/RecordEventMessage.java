@@ -208,9 +208,9 @@ public class RecordEventMessage {
                 if (checkURL.contains("/")) {
                     String signStr = "";
                     if(permCheck && versionCheck){
-                        signStr = CommonUtil.getSignature(Constant.TRACKING_SDKVS_VALUE, timestamp / 1000, builder.toString(),"1");
+                        signStr = CommonUtil.getSignature(Constant.TRACKING_SDKVS_VALUE, timestamp / 1000,DeviceInfoUtil.getImei(context),DeviceInfoUtil.getPackageName(context),DeviceInfoUtil.getDevice(), builder.toString());
                     }else {
-                        signStr = CommonUtil.getSignature(Constant.TRACKING_SDKVS_VALUE, timestamp / 1000, builder.toString(),null);
+                        signStr = CommonUtil.getSignature(Constant.TRACKING_SDKVS_VALUE, timestamp / 1000,"",DeviceInfoUtil.getPackageName(context),DeviceInfoUtil.getDevice(), builder.toString());
                     }
                     builder.append(separator);
                     builder.append(company.signature.paramKey);

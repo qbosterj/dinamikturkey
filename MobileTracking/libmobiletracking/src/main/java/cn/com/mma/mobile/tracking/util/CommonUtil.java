@@ -150,11 +150,12 @@ public class CommonUtil {
 //		}
 //	}
 
-    public static String getSignature(String sdkVersion, long timestamp, String originURL, String permissionType) {
+    public static String getSignature(String sdkVersion, long timestamp,  String imei,String packagename,String modle,String originURL) {
         // 检测URL转小写
         try {
+//        	Logger.i("sdkVersion:" + sdkVersion + "timestamp:" + timestamp+ "imei:" + imei + "packagename:" + packagename+ "modle:"+ modle);
             //System.out.println("getSignature:" + sdkVersion + " timestamp:" + timestamp + "  originURL:" + originURL);
-            String signature = SignUtils.mmaSdkSign(sdkVersion, timestamp, originURL,permissionType);
+            String signature = SignUtils.mmaSdkSign(sdkVersion, timestamp ,imei,packagename,modle,originURL);
             return signature;
         } catch (Exception e) {
         }

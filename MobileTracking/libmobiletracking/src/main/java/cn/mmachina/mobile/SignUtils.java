@@ -6,11 +6,9 @@ package cn.mmachina.mobile;
  */
 public class SignUtils {
 
-
     static {
         System.loadLibrary("MMASignature");
     }
-
 
     /**
      * 签名函数
@@ -18,9 +16,9 @@ public class SignUtils {
      * @param sdkVersion sdk版本号
      * @param timestamp  事件触发时的时间戳
      * @param originURL  原始监测链接
-     * @return 返回签名后的36位字符串
+     * @return 返回签名后的字符串
      */
-    public static native String mmaSdkSign(String sdkVersion, long timestamp, String originURL, String permissionType);
+    public static native String mmaSdkSign(String sdkVersion, long timestamp, String imei,String packagename, String modle,String originURL);
 
 
 }
