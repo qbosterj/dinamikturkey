@@ -20,6 +20,7 @@ import cn.com.mma.mobile.tracking.util.AntiConstantStats;
 import cn.com.mma.mobile.tracking.util.AppListUploader;
 import cn.com.mma.mobile.tracking.util.CommonUtil;
 import cn.com.mma.mobile.tracking.util.DeviceInfoUtil;
+import cn.com.mma.mobile.tracking.util.LRU;
 import cn.com.mma.mobile.tracking.util.LocationCollector;
 import cn.com.mma.mobile.tracking.util.Logger;
 import cn.com.mma.mobile.tracking.util.Reflection;
@@ -34,8 +35,8 @@ import cn.com.mma.mobile.tracking.viewability.origin.ViewAbilityStats;
 public class RecordEventMessage {
     private final Context context;
     private static RecordEventMessage mInstance;
-    public static HashMap<String,CallBack> RequestHashMap;
-    public static HashMap<String, ViewAbilityHandler.MonitorType> MonitorTypeHashMap;
+    public static LRU<String,CallBack> RequestHashMap;
+    public static LRU<String, ViewAbilityHandler.MonitorType> MonitorTypeHashMap;
 
     private RecordEventMessage(final Context context) {
         if (context == null) {
@@ -49,8 +50,8 @@ public class RecordEventMessage {
             synchronized (RecordEventMessage.class) {
                 if (mInstance == null) {
                     mInstance = new RecordEventMessage(ctx);
-                    RequestHashMap = new HashMap<>();
-                    MonitorTypeHashMap = new HashMap<>();
+                    RequestHashMap = new LRU<>(20);
+                    MonitorTypeHashMap = new LRU<>(20);
                 }
             }
         }
