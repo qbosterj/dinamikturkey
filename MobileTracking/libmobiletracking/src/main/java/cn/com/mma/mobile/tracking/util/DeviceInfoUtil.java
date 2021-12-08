@@ -43,13 +43,13 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
-import com.uodis.opendevice.aidl.OpenDeviceIdentifierService;
 
 import org.json.JSONArray;
 import cn.com.mma.mobile.tracking.api.Constant;
 import cn.com.mma.mobile.tracking.api.Countly;
 import cn.com.mma.mobile.tracking.bean.Company;
 import cn.com.mma.mobile.tracking.bean.SDK;
+import cn.com.mmachina.oaid.OaidUtils;
 
 import static cn.com.mma.mobile.tracking.util.Reflection.checkPermission;
 import static cn.com.mma.mobile.tracking.util.Reflection.checkPermissionX;
@@ -591,12 +591,15 @@ public class DeviceInfoUtil {
         deviceInfoParams.put(Constant.TRACKING_WIFI, isWifi(context));
         //新增ADID判断
         deviceInfoParams.put(Constant.TRACKING_ADID,DeviceInfoUtil.ADID);
-        if(Countly.ISNEED_OAID){
-//        	System.out.println("OAID:" + Countly.OAID);
-			deviceInfoParams.put(Constant.TRACKING_OAID, Countly.OAID);
-		}else {
-			deviceInfoParams.put(Constant.TRACKING_OAID, "unknow");
-		}
+
+		deviceInfoParams.put(Constant.TRACKING_OAID, OaidUtils.getOaid(context));
+
+//        if(Countly.ISNEED_OAID){
+////        	System.out.println("OAID:" + Countly.OAID);
+//			deviceInfoParams.put(Constant.TRACKING_OAID, Countly.OAID);
+//		}else {
+//			deviceInfoParams.put(Constant.TRACKING_OAID, "unknow");
+//		}
 
 //        DeviceInfoUtil deviceInfoUtil = new DeviceInfoUtil();
 //
@@ -625,7 +628,6 @@ public class DeviceInfoUtil {
 
     /**
      * 获取APP已经安装的应用列表信息
-     *
      * @param context
      * @return
      */

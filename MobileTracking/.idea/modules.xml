@@ -2,15 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ADDLRU-MMAViewabilitySDK_Android-MobileTracking.iml" filepath="$PROJECT_DIR$/.idea/modules/ADDLRU-MMAViewabilitySDK_Android-MobileTracking.iml" group="MobileTracking" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/MMAViewabilitySDK_Android-MobileTracking.iml" filepath="$PROJECT_DIR$/.idea/modules/MMAViewabilitySDK_Android-MobileTracking.iml" group="MobileTracking" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/MobileTrackingDemo/MMAViewabilitySDK_Android-MobileTracking-MobileTrackingDemo.iml" filepath="$PROJECT_DIR$/.idea/modules/MobileTrackingDemo/MMAViewabilitySDK_Android-MobileTracking-MobileTrackingDemo.iml" group="MobileTracking/MobileTrackingDemo" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/libmobiletracking/MMAViewabilitySDK_Android-MobileTracking-libmobiletracking.iml" filepath="$PROJECT_DIR$/.idea/modules/libmobiletracking/MMAViewabilitySDK_Android-MobileTracking-libmobiletracking.iml" group="MobileTracking/libmobiletracking" />
-      <module fileurl="file://$PROJECT_DIR$/MobileTracking.iml" filepath="$PROJECT_DIR$/MobileTracking.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/MobileTrackingDemo/MobileTracking-MobileTrackingDemo.iml" filepath="$PROJECT_DIR$/.idea/modules/MobileTrackingDemo/MobileTracking-MobileTrackingDemo.iml" group="MobileTracking/MobileTrackingDemo" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/libmobiletracking/MobileTracking-libmobiletracking.iml" filepath="$PROJECT_DIR$/.idea/modules/libmobiletracking/MobileTracking-libmobiletracking.iml" group="MobileTracking/libmobiletracking" />
-      <module fileurl="file://$PROJECT_DIR$/MobileTrackingDemo/MobileTrackingDemo.iml" filepath="$PROJECT_DIR$/MobileTrackingDemo/MobileTrackingDemo.iml" />
-      <module fileurl="file://$PROJECT_DIR$/libmobiletracking/libmobiletracking.iml" filepath="$PROJECT_DIR$/libmobiletracking/libmobiletracking.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/MMAViewabilitySDK_Android.MobileTracking.iml" filepath="$PROJECT_DIR$/.idea/modules/MMAViewabilitySDK_Android.MobileTracking.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/MobileTrackingDemo/MobileTracking.MobileTrackingDemo.iml" filepath="$PROJECT_DIR$/.idea/modules/MobileTrackingDemo/MobileTracking.MobileTrackingDemo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/libmobiletracking/MobileTracking.libmobiletracking.iml" filepath="$PROJECT_DIR$/.idea/modules/libmobiletracking/MobileTracking.libmobiletracking.iml" />
     </modules>
   </component>
 </project>
