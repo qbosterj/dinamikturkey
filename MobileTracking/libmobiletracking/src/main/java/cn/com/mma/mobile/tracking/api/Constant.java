@@ -16,10 +16,8 @@ public class Constant {
 	 * 对应<offlineCache>中的<timeout>字段
 	 */
 	public static int OFFLINECACHE_TIMEOUT = 15;
-
     /* 正常队列间隔周期 10s */
     public static int ONLINECACHE_QUEUEEXPIRATIONSECS = 10;
-
 	/**
 	 * 先获得位置信息，如需要才发送给服务器，这样能减少延迟。
 	 */
@@ -42,7 +40,6 @@ public class Constant {
 	public static final String TRACKING_WIFIBSSID = "WIFIBSSID";
 	//新增华为设备ID标识，OAID
 	public static final String TRACKING_OAID = "OAID";
-
 	public static final String TRACKING_ADID = "ADID";
 	public static final String TRACKING_IMEI = "IMEI";
 	public static final String TRACKING_RAWIMEI = "RAWIMEI";
@@ -55,17 +52,14 @@ public class Constant {
 	public static final String DIVIDE_MULT = "X";
 	public static final String TRACKING_SDKVS = "SDKVS";
 	public static final String TRACKING_SDKVS_VALUE = "V2.2.0"; //SDK版本号
-
 	/**
 	 * 新版常量 Begin
 	 */
 	public static final int NORMAL_MESSAGE_DEFAULT_PEROID = 30 * 1000;
 	public static final int FAILED_MESSAGE_DEFAULT_PEROID = 60 * 60 * 1000;
 	public static final int LOCATIOON_UPDATE_INTERVAL = 60 * 60 * 1000;
-
 	public static final long TIME_THREE_DAY = 3 * 24 * 60 * 60 * 1000;
 	public static final long TIME_ONE_DAY = 24 * 60 * 60 * 1000;//一天的毫秒数
-
 	// 网络参数配置
 	public static int DEFAULT_MAX_CONNECTIONS = 30;
 //	public static int DEFAULT_SOCKET_TIMEOUT = 30 * 1000;
