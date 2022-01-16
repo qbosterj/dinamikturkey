@@ -77,12 +77,16 @@ public class SendMessageThread extends Thread {
                                 if(callBack != null){
                                     callBack.onFailed(monitorType.toString() + ":MMA_URL Failed To Send");
                                 }
+                                RecordEventMessage.RequestHashMap.remove(eventData);
+                                RecordEventMessage.MonitorTypeHashMap.remove(eventData);
                                 return;
                             } else {
                                 if(callBack != null){
                                    callBack.onSuccess(monitorType.toString());
 //                                   Logger.i("事件类型:" + monitorType);
                                 }
+                                RecordEventMessage.RequestHashMap.remove(eventData);
+                                RecordEventMessage.MonitorTypeHashMap.remove(eventData);
                                 Logger.i("record [" + CommonUtil.md5(eventData) + "] upload succeed.");
                                 handleSuccessResult(spName, eventData);
                                 //[LOCALTEST] 测试计数:记录发送成功

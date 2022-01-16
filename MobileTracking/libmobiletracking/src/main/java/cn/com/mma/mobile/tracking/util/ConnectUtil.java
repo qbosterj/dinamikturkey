@@ -1,5 +1,11 @@
 package cn.com.mma.mobile.tracking.util;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.net.Uri;
+import android.text.TextUtils;
+import android.util.Log;
+
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -9,18 +15,11 @@ import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
-import android.annotation.SuppressLint;
-import android.content.Context;
-import android.net.Uri;
-import android.text.TextUtils;
-import android.util.Log;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -36,23 +35,10 @@ public class ConnectUtil {
     private static final String ALLOWED_URI_CHARS = "@#&=*+-_.,:!?()/~'%";
     private static final int CONNECT_TIMEOUT = 30 * 1000;
     private static final int READ_TIMEOUT = 30 * 1000;
-
     private static ConnectUtil instance;
 
-
     private ConnectUtil() {
-        try {
 
-            HttpsURLConnection.setDefaultHostnameVerifier(new NullHostNameVerifier());
-            SSLContext sc = SSLContext.getInstance("TLS");
-            sc.init(null, trustAllManager, new SecureRandom());
-            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-
-        } catch (KeyManagementException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
     }
 
     public static ConnectUtil getInstance() {
@@ -66,117 +52,112 @@ public class ConnectUtil {
         return instance;
     }
 
-//    public HttpURLConnection getHttpURLConnection(String url) {
-//        try {
-//            String encodedUrl = Uri.encode(url, ALLOWED_URI_CHARS);
-//            HttpURLConnection conn = (HttpURLConnection) new URL(encodedUrl).openConnection();
-//            conn.setConnectTimeout(CONNECT_TIMEOUT);
-//            conn.setReadTimeout(READ_TIMEOUT);
-//            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-//            conn.setRequestMethod("GET");
-//            // not allow auto controll redirect,仅作用于当前URLConnection对象
-//            conn.setInstanceFollowRedirects(false);
-//            return conn;
-//        } catch (Exception e) {
-//        }
-//        return null;
-//    }
-//
-//    public String doRequest(String url) {
-//        String result = null;
-//        InputStream is = null;
-//        BufferedReader br = null;
-//        HttpURLConnection conn = null;
-//        try {
-//            conn = getHttpURLConnection(url);
-//            if (conn == null) {
-//                return null;
-//            }
-//            is = conn.getInputStream();
-//            if (is == null) {
-//                return null;
-//            }
-//            br = new BufferedReader(new InputStreamReader(is, CHARSET));
-//            String line;
-//            StringBuffer sb = new StringBuffer();
-//            while ((line = br.readLine()) != null) {
-//                sb.append(line);
-//            }
-//            result = sb.toString();
-//        } catch (Exception e) {
-//        } finally {
-//            try {
-//                if (is != null)
-//                    is.close();
-//            } catch (IOException e) {
-//            }
-//            try {
-//                if (br != null)
-//                    br.close();
-//            } catch (IOException e) {
-//            }
-//            if (conn != null) {
-//                conn = null;
-//            }
-//        }
-//        return result;
-//    }
 
     public byte[] performGet(String destURL) {
-        //Logger.d("Attempting Get to " + destURL + "\n");
-        byte[] response = null;
-        HttpURLConnection httpConnection = null;
-        InputStream is = null;
+        //判断请求类型
+        if(destURL.startsWith("https:")){
+            return  performGetHttps(destURL);
+        }else {
+            //Logger.d("Attempting Get to " + destURL + "\n");
+            byte[] response = null;
+            HttpURLConnection httpConnection = null;
+            InputStream is = null;
+            try {
+                String encodedUrl = Uri.encode(destURL, ALLOWED_URI_CHARS);
+                URL url = new URL(encodedUrl);
+                httpConnection = (HttpURLConnection) url.openConnection();
 
+                httpConnection.setConnectTimeout(CONNECT_TIMEOUT);
+                httpConnection.setReadTimeout(READ_TIMEOUT);
+                httpConnection.setRequestMethod("GET");
+                httpConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+
+                int statusCode = httpConnection.getResponseCode();
+                if (statusCode == HttpURLConnection.HTTP_OK || statusCode == HttpURLConnection.HTTP_MOVED_PERM || statusCode == HttpURLConnection.HTTP_MOVED_TEMP) {
+
+                    try {
+                        is = httpConnection.getInputStream();
+                        response = writeToArr(is);
+                    } catch (Exception e) {
+                        response = new byte[]{};
+                    }
+
+                    //redirect
+                    String redirectURL = httpConnection.getHeaderField("Location");
+
+                    if (!TextUtils.isEmpty(redirectURL)) {
+                        httpConnection = (HttpURLConnection) new URL(redirectURL).openConnection();
+                        statusCode = httpConnection.getResponseCode();
+//                        Logger.d("redirect statusCode::" + statusCode);
+                    }
+                }
+            } catch (Exception e) {
+//            System.out.println("upload监测链接异常:" + e.toString());
+            } finally {
+                if (null != is)
+                    try {
+                        is.close();
+                    } catch (final IOException e) {
+                    }
+                if (null != httpConnection)
+
+                    httpConnection.disconnect();
+            }
+
+            return response;
+        }
+    }
+
+    public byte[] performGetHttps(String destURL) {
+//        Logger.d("Attempting Get to  " + destURL + "\n");
+        byte[] response = null;
+        HttpsURLConnection httpsConnection = null;
+        HttpsURLConnection redirecthttpsConnection = null;
+        InputStream is = null;
         try {
             String encodedUrl = Uri.encode(destURL, ALLOWED_URI_CHARS);
-
             URL url = new URL(encodedUrl);
-
-            httpConnection = (HttpURLConnection) url.openConnection();
-
-            httpConnection.setConnectTimeout(CONNECT_TIMEOUT);
-            httpConnection.setReadTimeout(READ_TIMEOUT);
-            httpConnection.setRequestMethod("GET");
-            httpConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-
-            int statusCode = httpConnection.getResponseCode();
-
-
-
+            //设置校验
+            SSLContext sc = SSLContext.getInstance("TLS");
+            sc.init(null, trustAllManager, new SecureRandom());
+            httpsConnection = (HttpsURLConnection) url.openConnection();
+            httpsConnection.setHostnameVerifier(new NullHostNameVerifier());
+            httpsConnection.setSSLSocketFactory(sc.getSocketFactory());
+            httpsConnection.setConnectTimeout(CONNECT_TIMEOUT);
+            httpsConnection.setReadTimeout(READ_TIMEOUT);
+            httpsConnection.setRequestMethod("GET");
+            httpsConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            int statusCode = httpsConnection.getResponseCode();
             if (statusCode == HttpURLConnection.HTTP_OK || statusCode == HttpURLConnection.HTTP_MOVED_PERM || statusCode == HttpURLConnection.HTTP_MOVED_TEMP) {
 
                 try {
-                    is = httpConnection.getInputStream();
+                    is = httpsConnection.getInputStream();
                     response = writeToArr(is);
                 } catch (Exception e) {
                     response = new byte[]{};
                 }
-
                 //redirect
-                String redirectURL = httpConnection.getHeaderField("Location");
+                String redirectURL = httpsConnection.getHeaderField("Location");
                 if (!TextUtils.isEmpty(redirectURL)) {
-                    //SDK访问o后面的落地页，并不能真正的打开具体页面，跳转的具体动作媒体自己完成
-                    httpConnection = (HttpURLConnection) new URL(redirectURL).openConnection();
-                    statusCode = httpConnection.getResponseCode();
-
-                    //Logger.d("redirect statusCode::" + statusCode);
+                    SSLContext redirectsc = SSLContext.getInstance("TLS");
+                    redirectsc.init(null, trustAllManager, new SecureRandom());
+                    redirecthttpsConnection = (HttpsURLConnection) new URL(redirectURL).openConnection();
+                    redirecthttpsConnection.setSSLSocketFactory(redirectsc.getSocketFactory());
+                    statusCode = redirecthttpsConnection.getResponseCode();
+//                    Logger.d("redirect statusCode::" + statusCode);
                 }
             }
         } catch (Exception e) {
-
-//            System.out.println("upload监测链接异常:" + e.toString());
-
-
+            Logger.i("upload error: " + e.toString());
         } finally {
             if (null != is)
                 try {
                     is.close();
                 } catch (final IOException e) {
                 }
-            if (null != httpConnection)
-                
-                httpConnection.disconnect();
+            if (null != httpsConnection)
+
+                httpsConnection.disconnect();
         }
 
         return response;
@@ -221,8 +202,6 @@ public class ConnectUtil {
             }
 
             int statusCode = httpConnection.getResponseCode();
-
-
             if (statusCode == HttpURLConnection.HTTP_OK) {
                 // 使用普通流读取
                 is = httpConnection.getInputStream();
@@ -328,6 +307,7 @@ public class ConnectUtil {
 
             int code =urlConn.getResponseCode();
 
+            Log.d("lincoln","请求code"+code);
             //获取所有Header
             Map<String, List<String>> map = urlConn.getHeaderFields();
             List<String> cookies = map.get("Set-Cookie");
@@ -406,7 +386,6 @@ public class ConnectUtil {
                 if(a!= null && a.contains("a=")){
                     value = a.split(";")[0];
                     value = value.split("=")[1];
-
                     request.completed(value);
                 }
             }
