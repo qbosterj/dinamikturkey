@@ -25,7 +25,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected static String NEW_EXPOSE_URL = "";
     protected static String CLICK_URL = "";
 
-    protected static String DISPLAY_EXPOSE_URL = "";
+    protected static String DISPLAY_IMP_URL = "";
     protected static String DISPLAY_CLICK_URL = "";
 
     protected static String VIDEO_EXPOSE_URL = "";
@@ -48,7 +48,7 @@ public abstract class BaseActivity extends AppCompatActivity {
                 NEW_EXPOSE_URL = "http://g.cn.miaozhen.com/x/k=1234567&p=778kb&dx=__IPDX__&rt=2&ns=__IP__&ni=__IESID__&v=__LOC__&xa=__ADPLATFORM__&tr=__REQUESTID__&mo=__OS__&m11=__OAID__&m0=__OPENUDID__&m0a=__DUID__&m1=__ANDROIDID1__&m1a=__ANDROIDID__&m2=__IMEI__&m4=__AAID__&m5=__IDFA__&m6=__MAC1__&m6a=__MAC__&nd=__DRA__&np=__POS__&nn=__APP__&nc=__VID__&m10=__HHHHHHH__&nf=__FLL__&ne=__SLL__&ng=__CTREF__&nx=__TRANSID__&vv=1&o=";
 
                CLICK_URL = "http://g.cn.miaozhen.com/x/k=1234567&p=778kb&dx=__IPDX__&rt=2&ns=__IP__&ni=__IESID__&v=__LOC__&xa=__ADPLATFORM__&tr=__REQUESTID__&mo=__OS__&m11=__OAID__&m0=__OPENUDID__&m0a=__DUID__&m1=__ANDROIDID1__&m1a=__ANDROIDID__&m2=__IMEI__&m4=__AAID__&m5=__IDFA__&m6=__MAC1__&m6a=__MAC__&nd=__DRA__&np=__POS__&nn=__APP__&nc=__VID__&m10=__HHHHHHH__&nf=__FLL__&ne=__SLL__&ng=__CTREF__&nx=__TRANSID__&vv=1&o=";
-                DISPLAY_EXPOSE_URL = "http://g.cn.miaozhen.com/x/k=1234567&p=778kb&dx=__IPDX__&rt=2&ns=__IP__&ni=__IESID__&v=__LOC__&xa=__ADPLATFORM__&tr=__REQUESTID__&mo=__OS__&m11=__OAID__&m0=__OPENUDID__&m0a=__DUID__&m1=__ANDROIDID1__&m1a=__ANDROIDID__&m2=__IMEI__&m4=__AAID__&m5=__IDFA__&m6=__MAC1__&m6a=__MAC__&nd=__DRA__&np=__POS__&nn=__APP__&nc=__VID__&m10=__HHHHHHH__&nf=__FLL__&ne=__SLL__&ng=__CTREF__&nx=__TRANSID__&vv=1&o=";
+                DISPLAY_IMP_URL = "http://g.cn.miaozhen.com/x/k=1234567&p=778kb&dx=__IPDX__&rt=2&ns=__IP__&ni=__IESID__&v=__LOC__&xa=__ADPLATFORM__&tr=__REQUESTID__&mo=__OS__&m11=__OAID__&m0=__OPENUDID__&m0a=__DUID__&m1=__ANDROIDID1__&m1a=__ANDROIDID__&m2=__IMEI__&m4=__AAID__&m5=__IDFA__&m6=__MAC1__&m6a=__MAC__&nd=__DRA__&np=__POS__&nn=__APP__&nc=__VID__&m10=__HHHHHHH__&nf=__FLL__&ne=__SLL__&ng=__CTREF__&nx=__TRANSID__&vv=1&o=";
                DISPLAY_CLICK_URL = "http://g.cn.miaozhen.com/x/k=1234567&p=778kb&dx=__IPDX__&rt=2&ns=__IP__&ni=__IESID__&v=__LOC__&xa=__ADPLATFORM__&tr=__REQUESTID__&mo=__OS__&m11=__OAID__&m0=__OPENUDID__&m0a=__DUID__&m1=__ANDROIDID1__&m1a=__ANDROIDID__&m2=__IMEI__&m4=__AAID__&m5=__IDFA__&m6=__MAC1__&m6a=__MAC__&nd=__DRA__&np=__POS__&nn=__APP__&nc=__VID__&m10=__HHHHHHH__&nf=__FLL__&ne=__SLL__&ng=__CTREF__&nx=__TRANSID__&vv=1&o=";
                 VIDEO_EXPOSE_URL = "http://g.cn.miaozhen.com/x/k=1234567&p=778kb&dx=__IPDX__&rt=2&ns=__IP__&ni=__IESID__&v=__LOC__&xa=__ADPLATFORM__&tr=__REQUESTID__&mo=__OS__&m11=__OAID__&m0=__OPENUDID__&m0a=__DUID__&m1=__ANDROIDID1__&m1a=__ANDROIDID__&m2=__IMEI__&m4=__AAID__&m5=__IDFA__&m6=__MAC1__&m6a=__MAC__&nd=__DRA__&np=__POS__&nn=__APP__&nc=__VID__&m10=__HHHHHHH__&nf=__FLL__&ne=__SLL__&ng=__CTREF__&nx=__TRANSID__&vv=1&o=";
 //                MZ_VIDEO_CLICK_URL = "http://r.cn.miaozhen.com/r/k=20416532&p=DuJJC&dx=__IPDX__&rt=2&ni=__IESID__&o=";

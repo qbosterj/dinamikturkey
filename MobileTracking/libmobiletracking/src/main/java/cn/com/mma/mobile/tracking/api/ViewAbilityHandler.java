@@ -6,13 +6,16 @@ import android.text.TextUtils;
 import android.view.View;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import cn.com.mma.mobile.tracking.bean.Argument;
 import cn.com.mma.mobile.tracking.bean.Company;
 import cn.com.mma.mobile.tracking.bean.SDK;
+import cn.com.mma.mobile.tracking.bean.Switch;
 import cn.com.mma.mobile.tracking.util.CommonUtil;
 import cn.com.mma.mobile.tracking.util.DeviceInfoUtil;
 import cn.com.mma.mobile.tracking.util.Logger;
@@ -24,6 +27,12 @@ import cn.com.mma.mobile.tracking.viewability.origin.ViewAbilityService;
 import cn.com.mma.mobile.tracking.viewability.origin.ViewAbilityStats;
 import cn.com.mma.mobile.tracking.viewability.origin.sniffer.ViewAbilityConfig;
 import cn.com.mma.mobile.tracking.viewability.webjs.ViewAbilityJsService;
+
+import static cn.com.mma.mobile.tracking.api.RecordEventMessage.deviceInfoParams;
+import static cn.com.mma.mobile.tracking.api.RecordEventMessage.updateInfoParams;
+import static cn.com.mma.mobile.tracking.util.DeviceInfoUtil.getAndroidId;
+import static cn.com.mma.mobile.tracking.util.DeviceInfoUtil.getImei;
+import static cn.com.mma.mobile.tracking.util.SdkConfigUpdateUtil.checkNeedDeviceUpdate;
 
 
 /**
@@ -235,7 +244,6 @@ public class ViewAbilityHandler {
             abilityStats.setViewabilityarguments(company.config.viewabilityarguments);
             // viewAbilityStats.setIsMZURL(company.name.equals(Constant.MZ_COMPANY_NAME));
 
-
             //[3] 原始监测链接中获取广告位ID,然后通过广告位ID生成ImpressionID
             String adAreaID = getAdAreaID(company, withoutRedirectURL);
 
@@ -257,6 +265,7 @@ public class ViewAbilityHandler {
 
             //如果调用普通和视频可视化监测接口,需要从监测链接获取动态配置参数和可视参数过滤
             if (monitorType == MonitorType.EXPOSEWITHABILITY || monitorType == MonitorType.VIDEOEXPOSEWITHABILITY) {
+
 
                 if(adView != null){
                     //从配置中读取采集策略
@@ -312,13 +321,13 @@ public class ViewAbilityHandler {
                         exposeURL.append(viewabilityResult);
                     }
                     if (adView != null && (adView instanceof View)) {
+                        //开启线程执行ViewAbility可视化监测
+                        String explorerID = company.domain.url + adAreaID;
+                        viewAbilityService.addViewAbilityMonitor(viewabilityURL.toString(), adView, impressionID, explorerID, abilityStats,callBack,monitorType);
                         //此处加上预渲染br参数添加到普通曝光中
                         String render = company.separator + view_render + company.equalizer + "1";
                         exposeURL.append(render);
                         viewabilityURL.append(render);
-                        //开启线程执行ViewAbility可视化监测
-                        String explorerID = company.domain.url + adAreaID;
-                        viewAbilityService.addViewAbilityMonitor(viewabilityURL.toString(), adView, impressionID, explorerID, abilityStats,callBack,monitorType);
 
                     } else {//如果传入View为空或者非View对象,则可视化监测结果为不可见:Adviewability=0,不可测量:AdMeasurability=0
                         Logger.w("监测链接传入的AdView为空,以正常曝光方式监测.");
@@ -342,28 +351,35 @@ public class ViewAbilityHandler {
 
                 //普通曝光Track ADS=========================
                 if(type == 0 && (monitorType != MonitorType.CLICK) ){
-                    if(adView ==null  ){
-                        StringBuilder rendersb = new StringBuilder();
-                        rendersb.append(company.separator);
-                        rendersb.append(view_render);
-                        rendersb.append(company.equalizer);
-                        rendersb.append("0");
-                        withoutRedirectURL += rendersb.toString();
 
-                    }else {
-                        StringBuilder rendersb = new StringBuilder();
-                        rendersb.append(company.separator);
-                        rendersb.append(view_render);
-                        rendersb.append(company.equalizer);
-                        rendersb.append("1");
-                        withoutRedirectURL += rendersb.toString();
-                    }
-                }else if(type == 1 && (monitorType != MonitorType.CLICK)){
                     StringBuilder rendersb = new StringBuilder();
                     rendersb.append(company.separator);
                     rendersb.append(view_render);
                     rendersb.append(company.equalizer);
                     rendersb.append("0");
+                    withoutRedirectURL += rendersb.toString();
+//                    if(adView ==null  ){
+//                        StringBuilder rendersb = new StringBuilder();
+//                        rendersb.append(company.separator);
+//                        rendersb.append(view_render);
+//                        rendersb.append(company.equalizer);
+//                        rendersb.append("0");
+//                        withoutRedirectURL += rendersb.toString();
+//
+//                    }else {
+//                        StringBuilder rendersb = new StringBuilder();
+//                        rendersb.append(company.separator);
+//                        rendersb.append(view_render);
+//                        rendersb.append(company.equalizer);
+//                        rendersb.append("1");
+//                        withoutRedirectURL += rendersb.toString();
+//                    }
+                }else if(type == 1 && (monitorType != MonitorType.CLICK)){
+                    StringBuilder rendersb = new StringBuilder();
+                    rendersb.append(company.separator);
+                    rendersb.append(view_render);
+                    rendersb.append(company.equalizer);
+                    rendersb.append("1");
                     withoutRedirectURL += rendersb.toString();
                 }
                 //===================================================
@@ -562,23 +578,88 @@ public class ViewAbilityHandler {
                 }
             }
         } else {//普通曝光或带可视化监测的曝光,每次触发时都生成新的ImpressionID,并存储
-            impressionID = generateImpressionID(context, adAreaId);
+            impressionID = generateImpressionID(context, adAreaId,company);
             impressions.put(adidKey, impressionID);
         }
 
         return impressionID;
     }
 
-    private static String generateImpressionID(Context context, String adAreaId) {
+    private static String generateImpressionID(Context context, String adAreaId,Company company) {
         try {
-            String mac = DeviceInfoUtil.getMacAddress(context);
-            String imei = DeviceInfoUtil.getImei(context);
-            String android = DeviceInfoUtil.getAndroidId(context);
+//            String mac = DeviceInfoUtil.getMacAddress(context);
+//            String imei = DeviceInfoUtil.getImei(context);
+//            String android = DeviceInfoUtil.getAndroidId(context);
+            boolean is_get_mac = false;
+            boolean is_get_imei = false;
+            boolean is_get_android = false;
+            //required argument fill in lists
+            for (Argument argument : company.config.arguments) {
+                if (argument.isRequired && !TextUtils.isEmpty(argument.key)) {
+                    switch (argument.key){
+                        case Constant.TRACKING_MAC:
+                            is_get_mac = true;
+                            break;
+                        case Constant.TRACKING_IMEI:
+                            is_get_imei= true;
+                            break;
+                        case Constant.TRACKING_ANDROIDID:
+                            is_get_android = true;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+            String mac = "";
+            String imei = "";
+            String androidid = "";
+            //判断配置文件是否配置了
+            if(is_get_mac){
+                if(checkNeedDeviceUpdate(updateInfoParams,Constant.TRACKING_MAC)){
+                    mac = DeviceInfoUtil.getMacAddress(context).replace(":", "").toUpperCase();
+                    deviceInfoParams.put(Constant.TRACKING_MAC,mac);
+                    updateInfoParams.put(Constant.TRACKING_MAC,System.currentTimeMillis());
+                }
+                    mac = deviceInfoParams.get(Constant.TRACKING_MAC);
+                if(TextUtils.isEmpty(mac)){
+                    mac = DeviceInfoUtil.getMacAddress(context).replace(":", "").toUpperCase();;
+                    deviceInfoParams.put(Constant.TRACKING_MAC,mac);
+                    updateInfoParams.put(Constant.TRACKING_MAC,System.currentTimeMillis());
+                }
+            }
+            if(is_get_imei){
+                if(checkNeedDeviceUpdate(updateInfoParams,Constant.TRACKING_IMEI)){
+                    imei = getImei(context);
+                    deviceInfoParams.put(Constant.TRACKING_IMEI,imei);
+                    updateInfoParams.put(Constant.TRACKING_IMEI,System.currentTimeMillis());
+                }
+                imei = deviceInfoParams.get(Constant.TRACKING_IMEI);
+                if(TextUtils.isEmpty(imei)){
+                    imei = getImei(context);
+                    deviceInfoParams.put(Constant.TRACKING_IMEI,imei);
+                    updateInfoParams.put(Constant.TRACKING_IMEI,System.currentTimeMillis());
+                }
+            }
+            if(is_get_android){
+                if(checkNeedDeviceUpdate(updateInfoParams,Constant.TRACKING_ANDROIDID)){
+                    androidid = getAndroidId(context);
+                    deviceInfoParams.put(Constant.TRACKING_ANDROIDID,androidid);
+                    updateInfoParams.put(Constant.TRACKING_ANDROIDID,System.currentTimeMillis());
+                }
+                androidid = deviceInfoParams.get(Constant.TRACKING_ANDROIDID);
+                if(TextUtils.isEmpty(androidid)){
+                    androidid = getAndroidId(context);
+                    deviceInfoParams.put(Constant.TRACKING_ANDROIDID,androidid);
+                    updateInfoParams.put(Constant.TRACKING_ANDROIDID,System.currentTimeMillis());
+                }
+            }
             String at = String.valueOf(System.currentTimeMillis());
-            String impressionId = imei + android + mac + adAreaId + at;
+            String impressionId = imei + androidid + mac + adAreaId + at;
             return CommonUtil.md5(impressionId);
         } catch (Exception e) {
-            e.printStackTrace();
+//            Logger.i("生成曝光id异常:" + e.getMessage());
+//            e.printStackTrace();
         }
         return null;
     }

@@ -1,6 +1,5 @@
 package cn.com.mma.mobile.tracking.util;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
@@ -15,18 +14,11 @@ import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 
-import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 
 public class ConnectUtil {
@@ -36,7 +28,6 @@ public class ConnectUtil {
     private static final int CONNECT_TIMEOUT = 30 * 1000;
     private static final int READ_TIMEOUT = 30 * 1000;
     private static ConnectUtil instance;
-
     private ConnectUtil() {
 
     }
@@ -58,21 +49,26 @@ public class ConnectUtil {
         if(destURL.startsWith("https:")){
             return  performGetHttps(destURL);
         }else {
-            //Logger.d("Attempting Get to " + destURL + "\n");
+//            Logger.d("Attempting Get to " + destURL + "\n");
             byte[] response = null;
             HttpURLConnection httpConnection = null;
             InputStream is = null;
             try {
                 String encodedUrl = Uri.encode(destURL, ALLOWED_URI_CHARS);
-                URL url = new URL(encodedUrl);
-                httpConnection = (HttpURLConnection) url.openConnection();
 
+//                Logger.i("encodedUrl:" + encodedUrl);
+
+                URL url = new URL(encodedUrl);
+
+
+                httpConnection = (HttpURLConnection) url.openConnection();
                 httpConnection.setConnectTimeout(CONNECT_TIMEOUT);
                 httpConnection.setReadTimeout(READ_TIMEOUT);
                 httpConnection.setRequestMethod("GET");
                 httpConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-
                 int statusCode = httpConnection.getResponseCode();
+
+//                Logger.i("请求返回的状态码：" + statusCode);
                 if (statusCode == HttpURLConnection.HTTP_OK || statusCode == HttpURLConnection.HTTP_MOVED_PERM || statusCode == HttpURLConnection.HTTP_MOVED_TEMP) {
 
                     try {
@@ -92,7 +88,8 @@ public class ConnectUtil {
                     }
                 }
             } catch (Exception e) {
-//            System.out.println("upload监测链接异常:" + e.toString());
+                Logger.e(e.getMessage());
+                Logger.e("upload监测链接异常:" + e.toString());
             } finally {
                 if (null != is)
                     try {
@@ -103,33 +100,29 @@ public class ConnectUtil {
 
                     httpConnection.disconnect();
             }
-
             return response;
         }
     }
 
     public byte[] performGetHttps(String destURL) {
-//        Logger.d("Attempting Get to  " + destURL + "\n");
+//        Logger.d("Attempting Get to https  " + destURL + "\n");
         byte[] response = null;
         HttpsURLConnection httpsConnection = null;
         HttpsURLConnection redirecthttpsConnection = null;
         InputStream is = null;
         try {
             String encodedUrl = Uri.encode(destURL, ALLOWED_URI_CHARS);
+
             URL url = new URL(encodedUrl);
             //设置校验
-            SSLContext sc = SSLContext.getInstance("TLS");
-            sc.init(null, trustAllManager, new SecureRandom());
             httpsConnection = (HttpsURLConnection) url.openConnection();
-            httpsConnection.setHostnameVerifier(new NullHostNameVerifier());
-            httpsConnection.setSSLSocketFactory(sc.getSocketFactory());
+
             httpsConnection.setConnectTimeout(CONNECT_TIMEOUT);
             httpsConnection.setReadTimeout(READ_TIMEOUT);
             httpsConnection.setRequestMethod("GET");
             httpsConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
             int statusCode = httpsConnection.getResponseCode();
             if (statusCode == HttpURLConnection.HTTP_OK || statusCode == HttpURLConnection.HTTP_MOVED_PERM || statusCode == HttpURLConnection.HTTP_MOVED_TEMP) {
-
                 try {
                     is = httpsConnection.getInputStream();
                     response = writeToArr(is);
@@ -139,16 +132,18 @@ public class ConnectUtil {
                 //redirect
                 String redirectURL = httpsConnection.getHeaderField("Location");
                 if (!TextUtils.isEmpty(redirectURL)) {
-                    SSLContext redirectsc = SSLContext.getInstance("TLS");
-                    redirectsc.init(null, trustAllManager, new SecureRandom());
+//                    SSLContext redirectsc = SSLContext.getInstance("TLS");
+//                    redirectsc.init(null, null, null);
+//                    redirectsc.init(null, trustAllManager, new SecureRandom());
                     redirecthttpsConnection = (HttpsURLConnection) new URL(redirectURL).openConnection();
-                    redirecthttpsConnection.setSSLSocketFactory(redirectsc.getSocketFactory());
+//                    redirecthttpsConnection.setSSLSocketFactory(redirectsc.getSocketFactory());
                     statusCode = redirecthttpsConnection.getResponseCode();
 //                    Logger.d("redirect statusCode::" + statusCode);
                 }
             }
         } catch (Exception e) {
-            Logger.i("upload error: " + e.toString());
+            Logger.e(e.getMessage());
+            Logger.i("upload监测链接异常:" + e.toString());
         } finally {
             if (null != is)
                 try {
@@ -323,37 +318,48 @@ public class ConnectUtil {
             //关闭http连接
             urlConn.disconnect();
         } catch (IOException e) {
-            e.printStackTrace();
+            Logger.e(e.getMessage());
         }
 
         return value;
     }
 
 
-    private static TrustManager[] trustAllManager = {new X509TrustManager() {
-        public X509Certificate[] getAcceptedIssuers() {
-            return null;
-        }
+//    private static TrustManager[] trustAllManager = {new X509TrustManager() {
+//        public X509Certificate[] getAcceptedIssuers() {
+//            return null;
+//        }
+//
+//        @SuppressLint("TrustAllX509TrustManager")
+//        public void checkClientTrusted(X509Certificate[] certs, String authType) {
+//        }
+//
+//        @SuppressLint("TrustAllX509TrustManager")
+//        public void checkServerTrusted(X509Certificate[] certs, String authType) {
+//
+//        }
+//    }};
 
-        @SuppressLint("TrustAllX509TrustManager")
-        public void checkClientTrusted(X509Certificate[] certs, String authType) {
-        }
-
-        @SuppressLint("TrustAllX509TrustManager")
-        public void checkServerTrusted(X509Certificate[] certs, String authType) {
-
-        }
-    }};
-
-    private static class NullHostNameVerifier implements HostnameVerifier {
-        public NullHostNameVerifier() {
-        }
-
-        @SuppressLint("BadHostnameVerifier")
-        public boolean verify(String hostname, SSLSession session) {
-            return true;
-        }
-    }
+//    private static class NullHostNameVerifier implements HostnameVerifier {
+//        public NullHostNameVerifier() {
+//        }
+//
+//        @SuppressLint("BadHostnameVerifier")
+//        public boolean verify(String hostname, SSLSession session) {
+//
+//            if (TextUtils.isEmpty(hostname)) {
+//                return false;
+//            }
+//
+////            List<String> tempList = Arrays.asList(VERIFY_HOST_NAME_ARRAY);
+////            for(String str:tempList){
+////                Logger.i("内置域名信息列表:"  + hostname.contains(str));
+////            }
+//
+////            return tempList.contains(hostname);
+//            return true;
+//        }
+//    }
 
     /**
      * 网络ID获取
@@ -393,7 +399,7 @@ public class ConnectUtil {
             //关闭http连接
             urlConn.disconnect();
         } catch (IOException e) {
-            e.printStackTrace();
+            Logger.e(e.getMessage());
 //            Log.d("qianqian","请求code"+e.toString());
 
         }

@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import android.Manifest;
 import android.content.ComponentName;
 import android.content.Context;
@@ -37,20 +36,15 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
-import android.support.annotation.RequiresPermission;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
-
-
 import org.json.JSONArray;
 import cn.com.mma.mobile.tracking.api.Constant;
 import cn.com.mma.mobile.tracking.api.Countly;
 import cn.com.mma.mobile.tracking.bean.Company;
 import cn.com.mma.mobile.tracking.bean.SDK;
-import cn.com.mmachina.oaid.OaidUtils;
-
 import static cn.com.mma.mobile.tracking.util.Reflection.checkPermission;
 import static cn.com.mma.mobile.tracking.util.Reflection.checkPermissionX;
 
@@ -68,9 +62,9 @@ public class DeviceInfoUtil {
 	public static String fileName = ".mzcookie.text";//文件夹名字,在文件夹前加".",就可以隐藏文件夹
 	public static String mainDic = Environment.getExternalStorageDirectory().toString();
 	public static String[] subDics = new String[]{"/.aaa/ddd/", "/.bbb/ddd", "/.ccc/ddd"};
-	public static String ADID = "unknow";
-
+	public static String ADID = "";
 	public String viewAbilityidentifier;
+
 
 	public void setViewAbilityidentifier(String viewAbilityidentifier) {
 		this.viewAbilityidentifier = viewAbilityidentifier;
@@ -79,7 +73,6 @@ public class DeviceInfoUtil {
 	public String getViewAbilityidentifier() {
 		return viewAbilityidentifier;
 	}
-
 
 
 	/**
@@ -115,23 +108,26 @@ public class DeviceInfoUtil {
 	 *
 	 * @return
 	 */
-    @RequiresPermission(Manifest.permission.ACCESS_WIFI_STATE)
 	public static String getWifiSSID(Context context) {
         try {
-            ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo networkInfo = cm.getActiveNetworkInfo();
-            if (networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
-                WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+			//权限检查
+			boolean permCheck = Reflection.checkPermission(context, Manifest.permission.ACCESS_WIFI_STATE) ||
+					Reflection.checkPermissionX(context, Manifest.permission.ACCESS_WIFI_STATE);
+			if(permCheck){
+				ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+				NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+				if (networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
+					WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+					WifiInfo wifiInfo = wm.getConnectionInfo();
+					if (wifiInfo != null && !TextUtils.isEmpty(wifiInfo.getSSID())) {
+						String ssid = wifiInfo.getSSID().trim();
+						if (ssid.startsWith("\"")) ssid = ssid.substring(1);
+						if (ssid.endsWith("\"")) ssid = ssid.substring(0, ssid.length() - 1);
+						return ssid;
+					}
+				}
+			}
 
-                WifiInfo wifiInfo = wm.getConnectionInfo();
-
-                if (wifiInfo != null && !TextUtils.isEmpty(wifiInfo.getSSID())) {
-                    String ssid = wifiInfo.getSSID().trim();
-                    if (ssid.startsWith("\"")) ssid = ssid.substring(1);
-                    if (ssid.endsWith("\"")) ssid = ssid.substring(0, ssid.length() - 1);
-                    return ssid;
-                }
-            }
         } catch (Exception e) {
 
         }
@@ -144,21 +140,23 @@ public class DeviceInfoUtil {
      * @param context
      * @return
      */
-    @RequiresPermission(Manifest.permission.ACCESS_WIFI_STATE)
     public static String getWiFiBSSID(Context context) {
         try {
+			//权限检查
+			boolean permCheck = Reflection.checkPermission(context, Manifest.permission.ACCESS_WIFI_STATE) ||
+					Reflection.checkPermissionX(context, Manifest.permission.ACCESS_WIFI_STATE);
+			if(permCheck){
+				ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+				NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+				if (networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
+					WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
 
-            ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo networkInfo = cm.getActiveNetworkInfo();
-            if (networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
-                WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-
-                WifiInfo wifiInfo = wm.getConnectionInfo();
-
-                if (null != wifiInfo && !TextUtils.isEmpty(wifiInfo.getBSSID())) {
-                    return wifiInfo.getBSSID();
-                }
-            }
+					WifiInfo wifiInfo = wm.getConnectionInfo();
+					if (null != wifiInfo && !TextUtils.isEmpty(wifiInfo.getBSSID())) {
+						return wifiInfo.getBSSID();
+					}
+				}
+			}
 
         } catch (Exception e) {
         }
@@ -225,8 +223,13 @@ public class DeviceInfoUtil {
 	 */
 	public static String getImei(Context context) {
 		try {
-			TelephonyManager manager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-			return manager.getDeviceId();
+			//权限检查
+			boolean permCheck = Reflection.checkPermission(context, Manifest.permission.READ_PHONE_STATE) ||
+					Reflection.checkPermissionX(context, Manifest.permission.READ_PHONE_STATE);
+			if(permCheck){
+				TelephonyManager manager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+				return manager.getDeviceId();
+			}
 		} catch (Throwable e) {
 		}
         return "";
@@ -451,7 +454,6 @@ public class DeviceInfoUtil {
                 if (!intf.getName().equalsIgnoreCase(wlan)) {
                     continue;
                 }
-
                 byte[] byteMac = intf.getHardwareAddress();
                 if (byteMac == null) {
                     return "";
@@ -478,20 +480,24 @@ public class DeviceInfoUtil {
      * @param context
      * @return
      */
-    @RequiresPermission(Manifest.permission.ACCESS_WIFI_STATE)
     private static String getMacWithManager(Context context) {
         try {
-            WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-            if (wm != null) {
-                WifiInfo wifiInfo = wm.getConnectionInfo();
-                if (wifiInfo != null) {
-                	if(wifiInfo.getMacAddress() != null){
-						return wifiInfo.getMacAddress();
-					}else {
-                		return "";
+			//权限检查
+			boolean permCheck = Reflection.checkPermission(context, Manifest.permission.ACCESS_WIFI_STATE) ||
+					Reflection.checkPermissionX(context, Manifest.permission.ACCESS_WIFI_STATE);
+			if(permCheck){
+				WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+				if (wm != null) {
+					WifiInfo wifiInfo = wm.getConnectionInfo();
+					if (wifiInfo != null) {
+						if(wifiInfo.getMacAddress() != null){
+							return wifiInfo.getMacAddress();
+						}else {
+							return "";
+						}
 					}
-                }
-            }
+				}
+			}
         } catch (Throwable e) {
             e.printStackTrace();
             return "";
@@ -553,6 +559,7 @@ public class DeviceInfoUtil {
 	}
 
     private static Map<String, String> deviceInfoParams = null;
+    private static Map<String, String> antiInfoParams = null;
 
     /**
      * 获取设备信息
@@ -566,49 +573,58 @@ public class DeviceInfoUtil {
             deviceInfoParams = new HashMap<>();
             try {
                 String mac = getMacAddress(context).replace(":", "").toUpperCase();
-                deviceInfoParams.put(Constant.TRACKING_MAC, mac);
-                deviceInfoParams.put(Constant.TRACKING_ANDROIDID, getAndroidId(context));
-                deviceInfoParams.put(Constant.TRACKING_OS_VERION, getOSVersion());
-                deviceInfoParams.put(Constant.TRACKING_TERM, getDevice());
-                deviceInfoParams.put(Constant.TRACKING_NAME, getAppName(context));
-                deviceInfoParams.put(Constant.TRACKING_KEY, getPackageName(context));
-                deviceInfoParams.put(Constant.TRACKING_SCWH, getResolution(context));
-                deviceInfoParams.put(Constant.TRACKING_OS, "0");
-                deviceInfoParams.put(Constant.TRACKING_SDKVS, Constant.TRACKING_SDKVS_VALUE);
-                deviceInfoParams.put(Constant.TRACKING_AAID, Reflection.getPlayAdId(context));
+                deviceInfoParams.put(Constant.TRACKING_MAC, mac);   //MAC 地址
+                deviceInfoParams.put(Constant.TRACKING_ANDROIDID, getAndroidId(context)); //AndroidID
+                deviceInfoParams.put(Constant.TRACKING_OS_VERION, getOSVersion());    // 手机系统版本
+                deviceInfoParams.put(Constant.TRACKING_TERM, getDevice());          //设备名字
+                deviceInfoParams.put(Constant.TRACKING_NAME, getAppName(context));   //APP名字
+                deviceInfoParams.put(Constant.TRACKING_KEY, getPackageName(context)); // APP包名
+                deviceInfoParams.put(Constant.TRACKING_SCWH, getResolution(context)); //屏幕分辨率
+                deviceInfoParams.put(Constant.TRACKING_OS, "0"); //设备系统Android 或者 IOS
+                deviceInfoParams.put(Constant.TRACKING_SDKVS, Constant.TRACKING_SDKVS_VALUE); //  //SDK版本号
+                deviceInfoParams.put(Constant.TRACKING_AAID, Reflection.getPlayAdId(context));// android google
             } catch (Exception e) {
             }
         }
         //参数动态获取
 		//Android Q 之后不允许设备获取IMEI
 		if(Build.VERSION.SDK_INT < 29){
-			deviceInfoParams.put(Constant.TRACKING_IMEI, getImei(context));
+			deviceInfoParams.put(Constant.TRACKING_IMEI, getImei(context)); //设备的IMEI
 			deviceInfoParams.put(Constant.TRACKING_RAWIMEI, getImei(context));
 		}
         String apMac = getWiFiBSSID(context).replace(":", "").toUpperCase();
-        deviceInfoParams.put(Constant.TRACKING_WIFIBSSID, apMac);
-        deviceInfoParams.put(Constant.TRACKING_WIFISSID, getWifiSSID(context));
-        deviceInfoParams.put(Constant.TRACKING_WIFI, isWifi(context));
+        deviceInfoParams.put(Constant.TRACKING_WIFIBSSID, apMac); //WIFIBSSID WIFI Mac地址
+        deviceInfoParams.put(Constant.TRACKING_WIFISSID, getWifiSSID(context)); //WIFI 名字
+        deviceInfoParams.put(Constant.TRACKING_WIFI, isWifi(context)); //手机当前网络信息
         //新增ADID判断
-        deviceInfoParams.put(Constant.TRACKING_ADID,DeviceInfoUtil.ADID);
+        deviceInfoParams.put(Constant.TRACKING_ADID,DeviceInfoUtil.ADID); //ADID
 
-		deviceInfoParams.put(Constant.TRACKING_OAID, OaidUtils.getOaid(context));
-
-//        if(Countly.ISNEED_OAID){
-////        	System.out.println("OAID:" + Countly.OAID);
-//			deviceInfoParams.put(Constant.TRACKING_OAID, Countly.OAID);
-//		}else {
-//			deviceInfoParams.put(Constant.TRACKING_OAID, "unknow");
-//		}
-
-//        DeviceInfoUtil deviceInfoUtil = new DeviceInfoUtil();
-//
-//        String oaidtest = deviceInfoUtil.getOAID(context);
-//
-//		System.out.println("oaidtest:" + oaidtest);
+		deviceInfoParams.put(Constant.TRACKING_OAID, OaidUtils.getOaid(context));//OAID
 
         return deviceInfoParams;
     }
+
+
+	/**
+	 * 获取反作弊信息
+	 * @param context
+	 * @return
+	 */
+	public static Map<String ,String> getAntiInfoParams(Context context){
+    	try {
+    		if(antiInfoParams == null){
+    			antiInfoParams = new HashMap<>();
+			}
+    		antiInfoParams.put(AntiConstantStats.isRoot,DeviceInfoUtil.checkRootFile() + "");
+    		antiInfoParams.put(AntiConstantStats.isSimulator,DeviceInfoUtil.isEmulator(context)+ "");
+    		antiInfoParams.put(AntiConstantStats.isHook,DeviceInfoUtil.getXposedCheckJar() +"");
+    		return antiInfoParams;
+
+		}catch (Throwable e){
+
+    		return null;
+		}
+	}
 
 
 	/**
@@ -625,46 +641,6 @@ public class DeviceInfoUtil {
         }
         return "";
     }
-
-    /**
-     * 获取APP已经安装的应用列表信息
-     * @param context
-     * @return
-     */
-    public static JSONArray getApplist(Context context) {
-
-        JSONArray applist = new JSONArray();
-        try {
-            List<PackageInfo> packages = context.getPackageManager().getInstalledPackages(0);
-            if (packages != null) {
-
-                for (PackageInfo packageInfo : packages) {
-                    StringBuffer appItem = new StringBuffer();
-
-                    boolean isSystemApp;
-                    if ((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) > 0) {
-                        isSystemApp = true;
-                    } else {
-                        isSystemApp = false;
-                    }
-                    //String appname = packageInfo.applicationInfo == null ? "" : packageInfo.applicationInfo.loadLabel(context.getPackageManager()).toString();
-                    String packageName = packageInfo.packageName == null ? "" : packageInfo.packageName.trim();
-                    String versionName = packageInfo.versionName == null ? "" : packageInfo.versionName.trim();
-                    appItem.append(packageName);
-                    appItem.append(",");
-                    appItem.append(versionName);
-                    appItem.append(",");
-                    appItem.append(isSystemApp ? "1" : "0");
-                    applist.put(appItem);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return applist;
-    }
-
 
 
 
@@ -805,7 +781,6 @@ public class DeviceInfoUtil {
 	public static String getDeviceAdid(final Context context, SDK sdk){
 
 		if (isAdidgeting) return "";
-
 		//检查SD卡adid是否存在
 		if(checkPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) || checkPermissionX(context, Manifest.permission.READ_EXTERNAL_STORAGE)){
 			if(checkAdidUpdate(context)){
@@ -834,7 +809,7 @@ public class DeviceInfoUtil {
 		final String adia_url = isAdidServerUrl(sdk);
 		//检查配置文件中是否配置了获取adid的URL
 		//检查配置文件中是否配置了获取adid的URL
-		if (!checkAdidUpdate(context) && !TextUtils.isEmpty(adia_url)) {
+		if (!TextUtils.isEmpty(adia_url)) {
 			isAdidgeting = true;
 			if (DeviceInfoUtil.isNetworkAvailable(context)) {
 				new Thread(new Runnable() {
@@ -924,6 +899,7 @@ public class DeviceInfoUtil {
 	 * @param context
 	 * @return
 	 */
+
 	public static int getCheckAdb(Context context){
 		return  (Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.ADB_ENABLED, 0) > 0) ? 1 :0;//判断adb调试模式是否打开
 
@@ -950,6 +926,26 @@ public class DeviceInfoUtil {
 				|| ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE))
 				.getNetworkOperatorName().toLowerCase().equals("android") ? 1 : 0;
 
+	}
+
+
+	public static HashMap<String,String > getUrlRawVaule(String url,String separator,String equalizer){
+		HashMap<String,String> hashMap = new HashMap();
+		try {
+			String [] strings = url.split(separator);
+			for(String s : strings){
+				String[] temps = s.split(equalizer);
+				if(temps.length == 1){
+					hashMap.put(temps[0],"");
+				}
+				if(temps.length == 2){
+					hashMap.put(temps[0],temps[1]);
+				}
+			}
+		}catch (Exception e){
+			return hashMap;
+		}
+		return hashMap;
 	}
 
 

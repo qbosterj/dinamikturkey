@@ -126,7 +126,6 @@ public class CommonUtil {
 
     public static String getType(String str,String exposeUrl){
 
-
     	return null;
 
 	}
@@ -155,7 +154,7 @@ public class CommonUtil {
         try {
 //        	Logger.i("sdkVersion:" + sdkVersion + "timestamp:" + timestamp+ "imei:" + imei + "packagename:" + packagename+ "modle:"+ modle);
             //System.out.println("getSignature:" + sdkVersion + " timestamp:" + timestamp + "  originURL:" + originURL);
-            String signature = SignUtils.mmaSdkSign(sdkVersion, timestamp ,imei,packagename,modle,originURL);
+            String signature = SignUtils.mmaSdkSign(sdkVersion, timestamp+"" ,imei,packagename,modle,originURL);
             return signature;
         } catch (Exception e) {
         }

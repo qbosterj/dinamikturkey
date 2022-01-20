@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/MMAViewabilitySDK_Android.MobileTracking.iml" filepath="$PROJECT_DIR$/.idea/modules/MMAViewabilitySDK_Android.MobileTracking.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/MobileTracking.iml" filepath="$PROJECT_DIR$/.idea/modules/MobileTracking.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/MobileTrackingDemo/MobileTracking.MobileTrackingDemo.iml" filepath="$PROJECT_DIR$/.idea/modules/MobileTrackingDemo/MobileTracking.MobileTrackingDemo.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/libmobiletracking/MobileTracking.libmobiletracking.iml" filepath="$PROJECT_DIR$/.idea/modules/libmobiletracking/MobileTracking.libmobiletracking.iml" />
     </modules>

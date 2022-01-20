@@ -7,7 +7,12 @@ package cn.mmachina.mobile;
 public class SignUtils {
 
     static {
-        System.loadLibrary("MMASignature");
+        try {
+            System.loadLibrary("MMASignature");
+
+        }catch (Throwable e){
+
+        }
     }
 
     /**
@@ -18,7 +23,7 @@ public class SignUtils {
      * @param originURL  原始监测链接
      * @return 返回签名后的字符串
      */
-    public static native String mmaSdkSign(String sdkVersion, long timestamp, String imei,String packagename, String modle,String originURL);
+    public static native String mmaSdkSign(String sdkVersion, String timestamp, String imei,String packagename, String modle,String originURL);
 
 
 }

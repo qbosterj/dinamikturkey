@@ -90,11 +90,16 @@ public class ViewAbilityJsExplorer {
                     // 以下两条设置可以使页面适应手机屏幕的分辨率，完整的显示在屏幕上
                     // 设置是否使用WebView推荐使用的窗口
                     ws.setUseWideViewPort(false);
+                    //防止跨域
+                    ws.setAllowContentAccess(false);
                     // 设置WebView加载页面的模式
                     ws.setLoadWithOverviewMode(false);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                mWebView.removeJavascriptInterface("searchBoxJavaBridge_");
+                mWebView.removeJavascriptInterface("accessibility");
+                mWebView.removeJavascriptInterface("accessibilityTraversal");
                 mWebView.clearHistory();
                 mWebView.clearCache(true);
                 isJavaScriptEnabled = ws.getJavaScriptEnabled();

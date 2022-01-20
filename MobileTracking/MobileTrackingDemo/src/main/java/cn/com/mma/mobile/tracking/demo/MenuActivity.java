@@ -46,6 +46,24 @@ public class MenuActivity extends BaseActivity {
         Intent intent = new Intent(this, AutoVideoActivity.class);
         startActivity(intent);
     }
+
+    //进入页面自动播放，调用普通曝光
+    public void HtmlPrenderDisPlay(View view) {
+        Intent intent = new Intent(this, DisplayPrenderAdHtml.class);
+        startActivity(intent);
+    }
+
+    //进入页面自动播放，调用普通曝光
+    public void HtmlPrenderVisableDisPlay(View view) {
+        Intent intent = new Intent(this, DisplayPrenderAdViableHtml.class);
+        startActivity(intent);
+    }
+
+    //进入页面自动播放，调用普通曝光
+    public void HtmlNoPrenderDisPlay(View view) {
+        Intent intent = new Intent(this, DisplayNoPrenderAdHtml.class);
+        startActivity(intent);
+    }
     //进入页面自动播放，调用普通曝光
 //    public void RegularAutoPlay(View view) {
 //        Intent intent = new Intent(this, RegularVideoActivity.class);

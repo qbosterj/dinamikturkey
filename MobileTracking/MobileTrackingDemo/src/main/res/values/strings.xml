@@ -5,4 +5,5 @@
     <string name="viewability_expose">可视化曝光</string>
     <string name="viewability_jsexpose">可视化JS曝光</string>
     <string name="adView">广告视图</string>
+    <string name="waiting">Waiting for ad fetch …</string>
 </resources>

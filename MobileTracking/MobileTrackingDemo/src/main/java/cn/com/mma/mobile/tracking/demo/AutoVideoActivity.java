@@ -79,10 +79,11 @@ public class AutoVideoActivity extends BaseActivity {
                         //进度监听事件
                         videoView.setOnCompletionListener(videoProgressListener);
                         //进入页面后
-                        Countly.sharedInstance().onVideoExpose(VIDEO_EXPOSE_URL, videoView, 2, new CallBack() {
+
+
+                        Countly.sharedInstance().videoImp(VIDEO_EXPOSE_URL, videoView, 1, 2, new CallBack() {
                             @Override
-                            public void onSuccess(String exposeUrl) {
-                                Logger.i("可视化视频自动播放：" +  exposeUrl);
+                            public void onSuccess(String eventType) {
 
                             }
 
@@ -91,6 +92,18 @@ public class AutoVideoActivity extends BaseActivity {
 
                             }
                         });
+//                        Countly.sharedInstance().onVideoExpose(VIDEO_EXPOSE_URL, videoView, 2, new CallBack() {
+//                            @Override
+//                            public void onSuccess(String exposeUrl) {
+//                                Logger.i("可视化视频自动播放：" +  exposeUrl);
+//
+//                            }
+//
+//                            @Override
+//                            public void onFailed(String errorMessage) {
+//
+//                            }
+//                        });
 
                     }else {
                         videoButton.setText("播放");

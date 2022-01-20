@@ -154,41 +154,41 @@ public class JSBridgeLoader {
         private static boolean isUsedHttps = false;
         private static final boolean usedGzip = false;
 
-        private static SSLSocketFactory getSSLSocketFactory() {
-            SSLSocketFactory foundSSLFactory;
-            try {
-                final SSLContext sslContext = SSLContext.getInstance("TLS");
-                sslContext.init(null, X509TrustAllManager, new SecureRandom());
-                foundSSLFactory = sslContext.getSocketFactory();
-            } catch (final GeneralSecurityException e) {
-                foundSSLFactory = null;
-            }
-            return foundSSLFactory;
-        }
+//        private static SSLSocketFactory getSSLSocketFactory() {
+//            SSLSocketFactory foundSSLFactory;
+//            try {
+//                final SSLContext sslContext = SSLContext.getInstance("TLS");
+//                sslContext.init(null, X509TrustAllManager, new SecureRandom());
+//                foundSSLFactory = sslContext.getSocketFactory();
+//            } catch (final GeneralSecurityException e) {
+//                foundSSLFactory = null;
+//            }
+//            return foundSSLFactory;
+//        }
 
 
-        private static TrustManager[] X509TrustAllManager = {new X509TrustManager() {
-            public X509Certificate[] getAcceptedIssuers() {
-                return null;
-            }
+//        private static TrustManager[] X509TrustAllManager = {new X509TrustManager() {
+//            public X509Certificate[] getAcceptedIssuers() {
+//                return null;
+//            }
+//
+//            public void checkClientTrusted(X509Certificate[] certs, String authType) {
+//            }
+//
+//            public void checkServerTrusted(X509Certificate[] certs, String authType) {
+//
+//            }
+//        }};
 
-            public void checkClientTrusted(X509Certificate[] certs, String authType) {
-            }
-
-            public void checkServerTrusted(X509Certificate[] certs, String authType) {
-
-            }
-        }};
-
-        private static class NullHostNameVerifier implements HostnameVerifier {
-            public NullHostNameVerifier() {
-
-            }
-
-            public boolean verify(String hostname, SSLSession session) {
-                return true;
-            }
-        }
+//        private static class NullHostNameVerifier implements HostnameVerifier {
+//            public NullHostNameVerifier() {
+//
+//            }
+//
+//            public boolean verify(String hostname, SSLSession session) {
+//                return true;
+//            }
+//        }
 
         /**
          * GET请求
@@ -207,8 +207,8 @@ public class JSBridgeLoader {
 
                 // support https
                 if (isUsedHttps) {
-                    ((HttpsURLConnection) httpConnection).setSSLSocketFactory(getSSLSocketFactory());
-                    ((HttpsURLConnection) httpConnection).setHostnameVerifier(new NullHostNameVerifier());
+//                    ((HttpsURLConnection) httpConnection).setSSLSocketFactory(getSSLSocketFactory());
+//                    ((HttpsURLConnection) httpConnection).setHostnameVerifier(new NullHostNameVerifier());
                 }
 
                 httpConnection.setConnectTimeout(3000);
@@ -285,7 +285,6 @@ public class JSBridgeLoader {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
             }
         }
         return byteArr;

@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "cn.com.mma.mobile.tracking.demo"
-        minSdkVersion 14
+        minSdkVersion 19
         targetSdkVersion 24
         versionCode 1
         versionName "1.0"
@@ -28,6 +28,6 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:24.2.1'
-        compile project(':libmobiletracking')
+    compile project(':libmobiletracking')
 //    compile files('libs/mmachina_sdk.jar')
 }

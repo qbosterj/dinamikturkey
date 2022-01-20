@@ -84,10 +84,9 @@ public class ClickVideoActivity extends BaseActivity {
             //进度监听事件
             videoView.setOnCompletionListener(videoProgressListener);
 
-            Countly.sharedInstance().onVideoExpose(VIDEO_EXPOSE_URL, videoView, 1, new CallBack() {
+            Countly.sharedInstance().videoImp(VIDEO_EXPOSE_URL, videoView, 1, 1, new CallBack() {
                 @Override
-                public void onSuccess(String exposeUrl) {
-                    Logger.i("可视化视频曝光回调："  + exposeUrl);
+                public void onSuccess(String eventType) {
 
                 }
 
@@ -96,6 +95,20 @@ public class ClickVideoActivity extends BaseActivity {
 
                 }
             });
+
+
+//            Countly.sharedInstance().onVideoExpose(VIDEO_EXPOSE_URL, videoView, 1, new CallBack() {
+//                @Override
+//                public void onSuccess(String exposeUrl) {
+//                    Logger.i("可视化视频曝光回调："  + exposeUrl);
+//
+//                }
+//
+//                @Override
+//                public void onFailed(String errorMessage) {
+//
+//                }
+//            });
 
         } catch (Exception e) {
             e.printStackTrace();

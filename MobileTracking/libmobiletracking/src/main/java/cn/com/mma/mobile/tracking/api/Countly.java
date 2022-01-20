@@ -1,13 +1,11 @@
 package cn.com.mma.mobile.tracking.api;
 
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.os.IBinder;
 import android.text.TextUtils;
 import android.view.View;
+import android.webkit.WebView;
 
 
 import java.util.Timer;
@@ -17,19 +15,20 @@ import cn.com.mma.mobile.tracking.bean.SDK;
 import cn.com.mma.mobile.tracking.util.DeviceInfoUtil;
 import cn.com.mma.mobile.tracking.util.LocationCollector;
 import cn.com.mma.mobile.tracking.util.Logger;
+import cn.com.mma.mobile.tracking.util.NetType;
+import cn.com.mma.mobile.tracking.util.OaidUtils;
 import cn.com.mma.mobile.tracking.util.SdkConfigUpdateUtil;
 import cn.com.mma.mobile.tracking.util.SharedPreferencedUtil;
-import cn.com.mma.mobile.tracking.util.klog.KLog;
 import cn.com.mma.mobile.tracking.viewability.origin.CallBack;
 import cn.com.mma.mobile.tracking.viewability.origin.ViewAbilityEventListener;
-import cn.com.mmachina.oaid.OaidUtils;
+import cn.com.mma.mobile.tracking.viewability.webjs.ViewAblityRender;
+import cn.com.mma.mobile.tracking.viewability.webjs.ViewJavascriptInterface;
 
 /**
  * MMAChinaSDK Android API 入口类
  *
  */
 public class Countly {
-
 
     private  SendMessageThread sendNormalMessageThread = null;
     private  SendMessageThread sendFailedMessageThread = null;
@@ -53,10 +52,16 @@ public class Countly {
     public static boolean LOCAL_TEST = true;
 //    public static boolean ISNEED_OAID = false;
 
+    private SDK sdk;
+
     public static String ACTION_STATS_EXPOSE = "ACTION_STATS_EXPOSE";
     public static String ACTION_STATS_VIEWABILITY = "ACTION.STATS_VIEWABILITY";
     public static String ACTION_STATS_SUCCESSED = "ACTION.STATS_SUCCESSED";
-//    public static String OAID = "unknow";
+    private String injectjsname = "mz_viewability_mobile.min.js";
+    private ViewJavascriptInterface viewJavascriptInterface;
+    private NetType receiver;
+
+
 
     private static Countly mInstance = null;
 
@@ -92,25 +97,22 @@ public class Countly {
             Logger.e("Countly.init(...) failed:Context can`t be null");
             return;
         }
-        if (sIsInitialized) {
-            return;
-        } else {
-            sIsInitialized = true;
-        }
-
         Context appContext = context.getApplicationContext();
         mContext = appContext;
         normalTimer = new Timer();
         failedTimer = new Timer();
         mUrildBuilder = RecordEventMessage.getInstance(context);
-
         try {
             //获取配置
-            SDK sdk = SdkConfigUpdateUtil.getSDKConfig(context);
-
+            sdk = SdkConfigUpdateUtil.getSDKConfig(context);
             //初始化可视化监测模块,传入SDK配置文件
             viewAbilityHandler = new ViewAbilityHandler(mContext, viewAbilityEventListener, sdk);
-
+            //初始化标识位放到后面
+            if (sIsInitialized) {
+                return;
+            } else {
+                sIsInitialized = true;
+            }
             //Location Service
             if (isTrackLocation(sdk)) {
                 isTrackLocation = true;
@@ -122,8 +124,8 @@ public class Countly {
 
            //获取ADID;
             DeviceInfoUtil.getDeviceAdid(context,sdk);
-            //初始化时尝试获取oaid
-            OaidUtils.getOaid(context);
+//            //初始化时尝试获取oaid
+//            OaidUtils.getOaid(context);
 
 
         } catch (Exception e) {
@@ -132,6 +134,9 @@ public class Countly {
 
         //开启定时器
         startTask();
+        receiver = new NetType();
+
+        registerBrocast(context,receiver);
     }
 
     /**
@@ -156,12 +161,23 @@ public class Countly {
         return false;
     }
 
+    /**
+     * 注册网络监听
+     * @param context
+     * @param receiver
+     */
+    private void registerBrocast(Context context, NetType receiver){
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
+        context.registerReceiver(receiver, intentFilter);
+    }
+
 
     /**
      * 普通点击事件监测接口
      * @param adURL 监测链接
      */
-    public  void onClick(String adURL,CallBack callBack) {
+    public void onClick(String adURL,CallBack callBack) {
 
         triggerEvent(EVENT_CLICK, adURL, null,0,callBack);
     }
@@ -170,27 +186,15 @@ public class Countly {
      * 普通曝光事件监测接口
      * @param adURL 监测链接
      */
-    public  void onExpose(String adURL,View adview,int type,CallBack callBack) {
-
+    public void onExpose(String adURL,View adview,int type,CallBack callBack) {
         triggerEvent(EVENT_EXPOSE, adURL, adview,type,callBack);
     }
-
     /**
      * 可视化曝光事件监测接口
      * @param adURL 监测链接
      * @param adView 监测广告视图对象
      */
     public void onExpose(String adURL, View adView,CallBack callBack) {
-
-//        adView.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//
-//              System.out.println("用户点击了View");
-//
-//            }
-//        });
-
         triggerEvent(EVENT_VIEWABILITY_EXPOSE, adURL, adView,0,callBack);
     }
 
@@ -203,9 +207,192 @@ public class Countly {
      */
     public void onVideoExpose(String adURL, View videoView, int videoPlayType,CallBack callBack) {
 
-
         triggerVideoEvent(EVENT_VIEWABILITY_VIDEOEXPOSE, adURL, videoView, videoPlayType,callBack);
     }
+
+    /**
+     * 添加监听
+     * @param context
+     * @param webView
+     */
+    public void SetAddJavascriptMonitor(Context context,WebView webView){
+
+        viewJavascriptInterface = new ViewJavascriptInterface(context);
+        webView.addJavascriptInterface(viewJavascriptInterface,"__mz_Monitor");
+    }
+
+    /**
+     * 注入js
+     * @param context
+     * @param webView
+     */
+//    public void StartInjectJavascript(Context context,WebView webView){
+//        ViewAblityRender.injectJavaScript(context,webView,injectjsname);
+//
+//    }
+
+
+    /**
+     *
+     * @param adUrl 监测链接
+     * @param adView 监测广告view对象
+     * @param impType 曝光类型
+     * @param callBack 监测回调对象
+     */
+    public void disPlayImp(String adUrl,View adView, int impType,CallBack callBack){
+        switch (impType){
+            case 0:
+                //是否配置了BTR
+                if(ViewAblityRender.isExistenceBtr(adUrl,sdk)){
+                    onExpose(adUrl,adView,0,callBack);
+                    if(ViewAblityRender.isBeginRender(adView)){
+                        onExpose(adUrl,adView,1,callBack);
+                    }
+                }else {
+                    //配置文件没有BTR判断参数
+                    if(ViewAblityRender.isBeginRender(adView)){
+                        onExpose(adUrl,adView,1,callBack);
+                    }
+                }
+                break;
+            case 1:
+                //是否配置了BTR
+//                Logger.i("可视化曝光类型");
+                if(ViewAblityRender.isExistenceBtr(adUrl,sdk)){
+                    onExpose(adUrl,adView,0,callBack);
+                    if(ViewAblityRender.isBeginRender(adView)){
+                        onExpose(adUrl, adView,callBack);
+                    }
+                }else {
+                    //配置文件没有BTR判断参数
+                    if(ViewAblityRender.isBeginRender(adView)){
+                        onExpose(adUrl, adView,callBack);
+                    }
+                }
+                break;
+            default:
+                Logger.e("请输入正确的监测类型：0或者1");
+                break;
+
+        }
+    };
+
+    /**
+     *
+     * @param adUrl 监测链接
+     * @param adView 监测广告view对象
+     * @param impType 曝光类型
+     * @param palyType 自动播放:1;手动播放:2;无法识别:0
+     * @param callBack 监测回调对象
+     */
+    public void videoImp(String adUrl,View adView, int impType,int palyType, CallBack callBack){
+
+        if(adView == null){
+            return;
+        }
+        switch (impType){
+            case 0:
+                //是否配置了BTR
+                if(ViewAblityRender.isExistenceBtr(adUrl,sdk)){
+                    onExpose(adUrl,adView,0,callBack);
+                    if(ViewAblityRender.isBeginRender(adView)){
+                        String tempUrl = ViewAblityRender.AssemblingUrl(adUrl,sdk,palyType);
+                        if(!TextUtils.isEmpty(tempUrl)){
+                            onExpose(tempUrl,adView,1,callBack);
+                        }
+                    }
+                }else {
+                    if(ViewAblityRender.isBeginRender(adView)){
+                        onExpose(adUrl,adView,1,callBack);
+                    }else {
+                        //todo 没有BTR的话调用了曝光接口
+                        callBack.onFailed("None BtR");
+                    }
+                }
+                break;
+            case 1:
+                //是否配置了BTR
+                if(ViewAblityRender.isExistenceBtr(adUrl,sdk)){
+                    onExpose(adUrl,adView,0,callBack);
+                    if(ViewAblityRender.isBeginRender(adView)){
+                        onVideoExpose(adUrl,adView,palyType,callBack);
+                    }
+                }else {
+                    if(ViewAblityRender.isBeginRender(adView)){
+                        onVideoExpose(adUrl,adView,palyType,callBack);
+                    }else {
+                        //todo 没有BTR的话调用了可见曝光接口
+                        callBack.onFailed("None BtR");
+                    }
+                }
+                break;
+            default:
+                Logger.e("请输入正确的监测类型：0或者1");
+                break;
+        }
+    }
+    /**
+     *
+     * @param adUrl 监测链接
+     * @param adView 监测广告view对象
+     * @param impType 曝光类型
+     * @param callBack 监测回调对象
+     */
+    public void webViewImp(String adUrl,View adView, int impType,boolean isInjectJs, CallBack callBack){
+                try {
+                    if(adView instanceof WebView){
+                        if(ViewAblityRender.isBeginRender(adView) && adView != null){
+                            WebView tempWebView = (WebView) adView;
+                            viewJavascriptInterface.setAdUrl(adUrl);
+                            viewJavascriptInterface.setCallBack(callBack);
+                            viewJavascriptInterface.setExposeType(impType);
+                            viewJavascriptInterface.setWebView(tempWebView);
+                            //判断是否注入js代码
+                            if(isInjectJs){
+                                ViewAblityRender.injectJavaScript(mContext,tempWebView,injectjsname);
+                            }
+                            //是否配置了BTR
+                            if(ViewAblityRender.isExistenceBtr(adUrl,sdk)){
+                                onExpose(adUrl,adView,0,callBack);
+                            }
+                        }
+                    }
+                }catch (Throwable e){
+
+                }
+    }
+    /**
+     * @param adUrl 监测链接
+     * @param adView 监测广告view对象
+     * @param impType 曝光类型
+     * @param palyType 自动播放:1;手动播放:2;无法识别:0
+     * @param callBack 监测回调对象
+     */
+    public void webViewVideoImp( String adUrl, View adView,  int impType, int palyType,boolean isInjectJs,CallBack callBack){
+        try {
+            if(ViewAblityRender.isBeginRender(adView) && adView != null){
+                WebView tempWebView = (WebView) adView;
+                String tempurl = ViewAblityRender.AssemblingUrl(adUrl,sdk,palyType);
+                if(TextUtils.isEmpty(tempurl)){
+                    viewJavascriptInterface.setAdUrl(adUrl);
+                }
+                viewJavascriptInterface.setAdUrl(tempurl);
+                viewJavascriptInterface.setCallBack(callBack);
+                viewJavascriptInterface.setExposeType(impType);
+                viewJavascriptInterface.setWebView(tempWebView);
+                viewJavascriptInterface.setPlayType(palyType);
+                //判断是否注入js代码
+                if(isInjectJs){
+                    ViewAblityRender.injectJavaScript(mContext,tempWebView,injectjsname);
+                }
+                if(ViewAblityRender.isExistenceBtr(adUrl,sdk)){
+                    onExpose(adUrl,adView,0,callBack);
+                }
+            }
+        }catch (Throwable e){
+        }
+    }
+
 
     /**
      * 可视化曝光监测停止接口
@@ -260,15 +447,11 @@ public class Countly {
             sendNormalMessageThread = null;
             sendFailedMessageThread = null;
             mUrildBuilder = null;
-
             if (viewAbilityHandler != null) viewAbilityHandler = null;
-
             sIsInitialized = false;
             mInstance = null;
         }
     }
-
-
 
     private  void triggerEvent(String eventName, String adURL, View adView,int type,CallBack callBack) {
         triggerEvent(eventName, adURL, adView, 0, type,callBack);
@@ -311,14 +494,13 @@ public class Countly {
     }
 
 
-
     private  void startTask() {
         try {
-            normalTimer.schedule(new TimerTask() {
-                public void run() {
-                    startNormalRun();
-                }
-            }, 0, Constant.ONLINECACHE_QUEUEEXPIRATIONSECS * 1000);
+//            normalTimer.schedule(new TimerTask() {
+//                public void run() {
+//                    startNormalRun();
+//                }
+//            }, 0, Constant.ONLINECACHE_QUEUEEXPIRATIONSECS * 1000);
 
             failedTimer.schedule(new TimerTask() {
                 public void run() {

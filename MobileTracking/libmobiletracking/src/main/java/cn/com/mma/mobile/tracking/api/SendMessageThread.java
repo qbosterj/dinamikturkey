@@ -48,7 +48,7 @@ public class SendMessageThread extends Thread {
         sendData();
     }
     private synchronized void sendData() {
-        synchronized (object) {
+        synchronized (SendMessageThread.class) {
             Set eventSets = SharedPreferencedUtil.getSharedPreferences(context, spName).getAll().keySet();
             Iterator iterator = eventSets.iterator();
             while (iterator.hasNext()) {

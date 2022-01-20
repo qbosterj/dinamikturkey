@@ -51,8 +51,6 @@ public class Reflection {
     }
 
 
-
-
     private static boolean getContextCompat() {
         try {
             Class<?> classObject = Class.forName("android.support.v4.content.ContextCompat");
@@ -87,7 +85,7 @@ public class Reflection {
 
     private static int getContextCompatValueX(Context ctx, String permissions) {
         try {
-            Class<?> classObject = Class.forName("android.support.v4.content.ContextCompat");
+            Class<?> classObject = Class.forName("androidx.core.content.ContextCompat");
             Method staticMethod = classObject.getDeclaredMethod("checkSelfPermission", Context.class, String.class);
             return (Integer) staticMethod.invoke(classObject, ctx, permissions);
         } catch (Exception e) {

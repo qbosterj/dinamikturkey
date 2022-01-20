@@ -11,7 +11,7 @@ public class Constant {
 	/**
 	 * 对应<offlineCache>中的<queueExpirationSecs>字段
 	 */
-	public static int OFFLINECACHE_QUEUEEXPIRATIONSECS = 15;
+	public static int OFFLINECACHE_QUEUEEXPIRATIONSECS = 10;
 	/**
 	 * 对应<offlineCache>中的<timeout>字段
 	 */
@@ -51,7 +51,7 @@ public class Constant {
 	/** frame参数中的分隔符 */
 	public static final String DIVIDE_MULT = "X";
 	public static final String TRACKING_SDKVS = "SDKVS";
-	public static final String TRACKING_SDKVS_VALUE = "V2.2.2"; //SDK版本号
+	public static final String TRACKING_SDKVS_VALUE = "V2.2.5"; //SDK版本号
 	/**
 	 * 新版常量 Begin
 	 */
@@ -60,6 +60,7 @@ public class Constant {
 	public static final int LOCATIOON_UPDATE_INTERVAL = 60 * 60 * 1000;
 	public static final long TIME_THREE_DAY = 3 * 24 * 60 * 60 * 1000;
 	public static final long TIME_ONE_DAY = 24 * 60 * 60 * 1000;//一天的毫秒数
+	public static final long TIME_FIVE = 2* 60 * 1000;//一天的毫秒数
 	// 网络参数配置
 	public static int DEFAULT_MAX_CONNECTIONS = 30;
 //	public static int DEFAULT_SOCKET_TIMEOUT = 30 * 1000;

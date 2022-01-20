@@ -2,6 +2,8 @@ package cn.com.mma.mobile.tracking.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.Map;
+
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.text.TextUtils;
@@ -102,7 +104,6 @@ public class SdkConfigUpdateUtil {
             // 每天更新一次:时间间隔大于1天则更新
             boolean isWifiUpdate = (CommonUtil.isConnected(context, ConnectivityManager.TYPE_WIFI)
                     && (currentTime - lastUpdateTime >= Constant.TIME_ONE_DAY));
-
             // 每三天更新一次：时间间隔大于3天则更新
             boolean isMobileUpdate = (CommonUtil.isConnected(context, ConnectivityManager.TYPE_MOBILE)
                     && (currentTime - lastUpdateTime >= Constant.TIME_THREE_DAY));
@@ -120,44 +121,31 @@ public class SdkConfigUpdateUtil {
         return result;
     }
 
-//	/**
-//	 * 网络更新config.xml文件
-//	 *
-//	 * @param configUrl
-//	 */
-//	private static SDK doUpdate(Context context, String configUrl) {
-//        // natwork unavailable return
-//        if (!DeviceInfoUtil.isNetworkAvailable(context)) {
-//            return null;
-//        }
-//        SDK sdk = null;
-//
-//        try {
-//            byte[] buffer = ConnectUtil.getInstance().performGet(configUrl);
-//            if (buffer != null) {
-//                sdk = XmlUtil.doParser(new ByteArrayInputStream(buffer));
-//                //如果可以成功解析为SDK实体类,并且存在Company配置,缓存原始XML数据
-//                if (sdk != null && sdk.companies != null && sdk.companies.size() > 0) {
-//                    String response = new String(buffer);
-//                    if (!TextUtils.isEmpty(response)) {
-//                        SharedPreferencedUtil.putString(context,
-//                                SharedPreferencedUtil.SP_NAME_CONFIG,
-//                                SharedPreferencedUtil.SP_CONFIG_KEY_FILE, response);
-//
-//                        SharedPreferencedUtil.putLong(context,
-//                                SharedPreferencedUtil.SP_NAME_OTHER,
-//                                SharedPreferencedUtil.SP_OTHER_KEY_UPDATE_TIME,
-//                                System.currentTimeMillis());
-//                        Logger.d("Successful update sdk_config files");
-//                    }
-//                }
-//            }
-//        } catch (Exception e) {
-//            Logger.w("Online update sdk_config failed!:" + e.getMessage());
-//        }
-//
-//        return sdk;
-//    }
+    /**
+     * 判断是否更新设备ID信息
+     * @param updateMap
+     * @param key
+     * @return
+     */
+    public static boolean checkNeedDeviceUpdate(Map<String,Long> updateMap,String key ) {
+        try {
+                Long value = updateMap.get(key);
+                if(value == null){
+//                    Logger.i("首次更新字段的时间戳：" + key);
+                    updateMap.put(key,System.currentTimeMillis());
+                    return true;
+                }
+                long lastUpdateTime = value.longValue();
+                long currentTime = System.currentTimeMillis();
+                boolean isupdate = currentTime - lastUpdateTime >= Constant.TIME_ONE_DAY;
+//                Logger.i("lastUpdateTime:" + lastUpdateTime + ":: currentTime:" + currentTime + "是否需要更新:" +isupdate + "::Key::" +key);
+                return isupdate;
+
+        }catch (Exception e){
+            return true;
+        }
+    }
+
 
 	/**
 	 * 从SharedPreferences中获取sdkconfig.xml文件,转换成SDK对象

@@ -35,18 +35,35 @@ public class DisplayActivity extends BaseActivity {
 //        anim.setFillAfter(true);//动画执行完毕后停留在最后一帧
 //        adView.startAnimation(anim);
 
-        Countly.sharedInstance().onExpose(DISPLAY_EXPOSE_URL, adView, new CallBack() {
-            @Override
-            public void onSuccess(String exposeUrl) {
-                Logger.i("可视化曝光回调："  + exposeUrl);
+//        Countly.sharedInstance().onExpose(DISPLAY_EXPOSE_URL, adView, new CallBack() {
+//            @Override
+//            public void onSuccess(String exposeUrl) {
+//                Logger.i("可视化曝光回调："  + exposeUrl);
+//
+//            }
+//
+//            @Override
+//            public void onFailed(String errorMessage) {
+//
+//            }
+//        });
 
-            }
 
-            @Override
-            public void onFailed(String errorMessage) {
+         Countly.sharedInstance().videoImp(DISPLAY_IMP_URL, adView, 1 ,8,new CallBack() {
+             /**
+              * 监测事件类型
+              * @param eventType
+              */
+             @Override
+             public void onSuccess(String eventType) {
+                 //监测代码发送成功
+             }
+             @Override
+             public void onFailed(String errorMessage) {
+                 //监测代码发送失败
 
-            }
-        });
+             }
+         });
 
 //        new Handler().postDelayed(new Runnable(){
 //            public void run() {

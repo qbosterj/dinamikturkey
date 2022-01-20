@@ -33,6 +33,7 @@ public class SharedPreferencedUtil {
 	 * SP_NAME_OTHER 上次更新时间key
 	 */
 	public static final String SP_OTHER_KEY_UPDATE_TIME = "updateTime";
+	public static final String SP_DEVICE_UPDATE_TIME = "deviceTime";
 
     /**SP_NAME_OTHER */
     public static final String SP_OTHER_KEY_LASTUPLOADTIME_SUFFIX = "_uploadtime";
