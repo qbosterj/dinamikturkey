@@ -299,7 +299,9 @@ public class RecordEventMessage {
                         builder.append(separator);
                         builder.append(argumentValue);
                         builder.append(equalizer);
-                        builder.append(temp_oaid);
+//                        builder.append(temp_oaid);
+                        builder.append(CommonUtil.encodingUTF8(temp_oaid, argument, company));
+
                     }else {
                         if(urlvalue != null){
                             builder.append(separator);
@@ -308,7 +310,23 @@ public class RecordEventMessage {
                             builder.append(urlvalue);
                         }
                     }
-                }else if(argumentKey.equals(Constant.TRACKING_ADID)){   //新增ADID
+                }else if(argumentKey.equals(Constant.TRACKING_OAID1)){
+                    String oaid1 = deviceInfoParams.get(Constant.TRACKING_OAID) ;
+                    if(!TextUtils.isEmpty(oaid1)){
+                        builder.append(separator);
+                        builder.append(argumentValue);
+                        builder.append(equalizer);
+//                        builder.append(temp_oaid);
+                        builder.append(CommonUtil.md5(oaid1));
+                    }else {
+                        builder.append(separator);
+                        builder.append(argumentValue);
+                        builder.append(equalizer);
+//                        builder.append(temp_oaid);
+                        builder.append(CommonUtil.md5(Constant.TRACKING_OAID));
+                    }
+
+                } else if(argumentKey.equals(Constant.TRACKING_ADID)){   //新增ADID
                     String temp_adid;
                     if(checkNeedDeviceUpdate(updateInfoParams,argumentKey)){
                         temp_adid = DeviceInfoUtil.ADID;

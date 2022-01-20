@@ -45,6 +45,7 @@ public class Countly {
 
     private static final String EVENT_CLICK = "onClick";
     private static final String EVENT_EXPOSE = "onExpose";
+    private static final String EVENT_TRACKADS = "onTrackExpose";
     private static final String EVENT_VIEWABILITY_EXPOSE = "onAdViewExpose";
     private static final String EVENT_VIEWABILITY_VIDEOEXPOSE = "onVideoExpose";
 
@@ -189,6 +190,9 @@ public class Countly {
     public void onExpose(String adURL,View adview,int type,CallBack callBack) {
         triggerEvent(EVENT_EXPOSE, adURL, adview,type,callBack);
     }
+    public void onTrackExpose(String adURL,View adview,int type,CallBack callBack) {
+        triggerEvent(EVENT_TRACKADS, adURL, adview,type,callBack);
+    }
     /**
      * 可视化曝光事件监测接口
      * @param adURL 监测链接
@@ -244,7 +248,8 @@ public class Countly {
             case 0:
                 //是否配置了BTR
                 if(ViewAblityRender.isExistenceBtr(adUrl,sdk)){
-                    onExpose(adUrl,adView,0,callBack);
+//                    onExpose(adUrl,adView,0,callBack);
+                    onTrackExpose(adUrl,adView,0,callBack);
                     if(ViewAblityRender.isBeginRender(adView)){
                         onExpose(adUrl,adView,1,callBack);
                     }
@@ -259,7 +264,8 @@ public class Countly {
                 //是否配置了BTR
 //                Logger.i("可视化曝光类型");
                 if(ViewAblityRender.isExistenceBtr(adUrl,sdk)){
-                    onExpose(adUrl,adView,0,callBack);
+//                    onExpose(adUrl,adView,0,callBack);
+                    onTrackExpose(adUrl,adView,0,callBack);
                     if(ViewAblityRender.isBeginRender(adView)){
                         onExpose(adUrl, adView,callBack);
                     }
@@ -294,7 +300,8 @@ public class Countly {
             case 0:
                 //是否配置了BTR
                 if(ViewAblityRender.isExistenceBtr(adUrl,sdk)){
-                    onExpose(adUrl,adView,0,callBack);
+//                    onExpose(adUrl,adView,0,callBack);
+                    onTrackExpose(adUrl,adView,0,callBack);
                     if(ViewAblityRender.isBeginRender(adView)){
                         String tempUrl = ViewAblityRender.AssemblingUrl(adUrl,sdk,palyType);
                         if(!TextUtils.isEmpty(tempUrl)){
@@ -313,7 +320,8 @@ public class Countly {
             case 1:
                 //是否配置了BTR
                 if(ViewAblityRender.isExistenceBtr(adUrl,sdk)){
-                    onExpose(adUrl,adView,0,callBack);
+//                    onExpose(adUrl,adView,0,callBack);
+                    onTrackExpose(adUrl,adView,0,callBack);
                     if(ViewAblityRender.isBeginRender(adView)){
                         onVideoExpose(adUrl,adView,palyType,callBack);
                     }
@@ -353,7 +361,9 @@ public class Countly {
                             }
                             //是否配置了BTR
                             if(ViewAblityRender.isExistenceBtr(adUrl,sdk)){
-                                onExpose(adUrl,adView,0,callBack);
+//                                onExpose(adUrl,adView,0,callBack);
+                                onTrackExpose(adUrl,adView,0,callBack);
+
                             }
                         }
                     }
@@ -479,6 +489,9 @@ public class Countly {
         switch (eventName) {
             case EVENT_CLICK:
                 viewAbilityHandler.onClick(adURL,callBack);
+                break;
+            case EVENT_TRACKADS:
+                viewAbilityHandler.onTrackExpose(adURL,adView,type,callBack);
                 break;
             case EVENT_EXPOSE:
                 viewAbilityHandler.onExpose(adURL,adView,type,callBack);

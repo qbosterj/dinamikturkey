@@ -40,6 +40,7 @@ public class Constant {
 	public static final String TRACKING_WIFIBSSID = "WIFIBSSID";
 	//新增华为设备ID标识，OAID
 	public static final String TRACKING_OAID = "OAID";
+	public static final String TRACKING_OAID1 = "OAID1";
 	public static final String TRACKING_ADID = "ADID";
 	public static final String TRACKING_IMEI = "IMEI";
 	public static final String TRACKING_RAWIMEI = "RAWIMEI";

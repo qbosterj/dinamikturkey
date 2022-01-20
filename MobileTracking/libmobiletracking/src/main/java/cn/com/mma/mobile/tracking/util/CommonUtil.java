@@ -250,6 +250,7 @@ public class CommonUtil {
         try {
 
             if (company.sswitch.encrypt.containsKey(argument.key)) {
+
                 if ("md5".equalsIgnoreCase(company.sswitch.encrypt.get(argument.key)))
                     str = CommonUtil.md5(str);
             }

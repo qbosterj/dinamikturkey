@@ -44,6 +44,7 @@ public class ViewAbilityHandler {
     public enum MonitorType {
         CLICK,
         IMPRESSION,
+        TRACKADS,
         EXPOSEWITHABILITY,
         VIDEOEXPOSEWITHABILITY,
         VIEWABLE,
@@ -147,7 +148,9 @@ public class ViewAbilityHandler {
     public void onExpose(String originUrl ,View view ,int type,CallBack callBack) {
         handlerOriginURL(originUrl, MonitorType.IMPRESSION, view, 0,type,callBack);
     }
-
+    public void onTrackExpose(String originUrl ,View view ,int type,CallBack callBack) {
+        handlerOriginURL(originUrl, MonitorType.TRACKADS, view, 0,type,callBack);
+    }
     /**
      * Banner可视化监测
      * VideoType=0
@@ -563,24 +566,58 @@ public class ViewAbilityHandler {
      * @return
      * @throws Exception
      */
+//    private String getImpressionID(Company company, MonitorType monitorType, String adAreaId) throws Exception {
+//
+//        String impressionID = "";
+//
+//        String adidKey = company.domain.url + adAreaId;
+//
+//        //点击检测是从已经存在的池子内查找是否有存在的广告位及ID
+//        if (monitorType == MonitorType.CLICK) {
+//            for (String adidkey : impressions.keySet()) {
+//                if (adidKey.equals(adidkey)) {
+//                    impressionID = impressions.get(adidkey);
+//                    break;
+//                }
+//            }
+//        } else {//普通曝光或带可视化监测的曝光,每次触发时都生成新的ImpressionID,并存储
+//            impressionID = generateImpressionID(context, adAreaId,company);
+//            impressions.put(adidKey, impressionID);
+//        }
+//
+//        return impressionID;
+//    }
+
     private String getImpressionID(Company company, MonitorType monitorType, String adAreaId) throws Exception {
-
         String impressionID = "";
-
         String adidKey = company.domain.url + adAreaId;
 
-        //点击检测是从已经存在的池子内查找是否有存在的广告位及ID
-        if (monitorType == MonitorType.CLICK) {
+        if (monitorType == MonitorType.TRACKADS) {
+            impressionID = generateImpressionID(context, adAreaId,company);
+            impressions.put(adidKey, impressionID);
+        } else {//普通曝光或带可视化监测的曝光,每次触发时都生成新的ImpressionID,并存储
             for (String adidkey : impressions.keySet()) {
                 if (adidKey.equals(adidkey)) {
                     impressionID = impressions.get(adidkey);
                     break;
                 }
             }
-        } else {//普通曝光或带可视化监测的曝光,每次触发时都生成新的ImpressionID,并存储
-            impressionID = generateImpressionID(context, adAreaId,company);
-            impressions.put(adidKey, impressionID);
         }
+
+
+
+        //点击检测是从已经存在的池子内查找是否有存在的广告位及ID
+//        if (monitorType == MonitorType.CLICK) {
+//            for (String adidkey : impressions.keySet()) {
+//                if (adidKey.equals(adidkey)) {
+//                    impressionID = impressions.get(adidkey);
+//                    break;
+//                }
+//            }
+//        } else {//普通曝光或带可视化监测的曝光,每次触发时都生成新的ImpressionID,并存储
+//            impressionID = generateImpressionID(context, adAreaId,company);
+//            impressions.put(adidKey, impressionID);
+//        }
 
         return impressionID;
     }

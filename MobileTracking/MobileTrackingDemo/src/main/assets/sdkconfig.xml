@@ -455,6 +455,7 @@
                     <IDA>raw</IDA>
                     <IMEI>md5</IMEI>
                     <ANDROIDID>md5</ANDROIDID>
+                    <OAID>raw</OAID>
                 </encrypt>
 
                 <!--<applist>-->
@@ -497,6 +498,13 @@
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
+
+                    <argument>
+                        <key>IDFA1</key>F
+                        <value>m5b</value>
+                        <urlEncode>true</urlEncode>
+                        <isRequired>true</isRequired>
+                    </argument>
                     <!-- Android IMEI MD5 值 -->
                     <argument>
                         <key>IMEI</key>
@@ -512,13 +520,13 @@
                         <isRequired>true</isRequired>
                     </argument>
 
-                    <argument>
-                        <key>STA</key>
-                        <value>st</value>
-                        <urlEncode>true</urlEncode>
-                        <isRequired>true</isRequired>
-                    </argument>
-                     Android AndroidID 值
+<!--                    <argument>-->
+<!--                        <key>STA</key>-->
+<!--                        <value>st</value>-->
+<!--                        <urlEncode>true</urlEncode>-->
+<!--                        <isRequired>true</isRequired>-->
+<!--                    </argument>-->
+<!--                     Android AndroidID 值-->
                     <argument>
                         <key>ANDROIDID</key>
                         <value>m1a</value>
@@ -530,6 +538,13 @@
                     <argument>
                         <key>OAID</key>
                         <value>m11</value>
+                        <urlEncode>true</urlEncode>
+                        <isRequired>true</isRequired>
+                    </argument>
+
+                    <argument>
+                        <key>OAID1</key>
+                        <value>m11a</value>
                         <urlEncode>true</urlEncode>
                         <isRequired>true</isRequired>
                     </argument>
